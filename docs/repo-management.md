@@ -94,13 +94,12 @@
 
 ### 推荐安装入口
 
-- 推荐流程是两步：
-  1. 先安装一个很薄的 `harness-init` skill
-  2. 再在具体项目里让它从 GitHub 按需拉取所需 stack 文件
-- 对 Codex，推荐通过内置的 `$skill-installer` 从 `ppop123/harness` 的 `skills/harness-init` 安装这个 skill。
-- 对 Claude，可以继续通过 release asset 安装 `harness-init.skill`，但这个 asset 也必须是 thin loader，而不是模板打包文件。
-- 项目装载阶段的推荐请求形态是：
-  `从 https://github.com/ppop123/harness 装载 ts-nextjs 栈的 harness 工程结构到当前目录`
+- 统一安装方式：
+  ```bash
+  claude skill install https://github.com/ppop123/harness/releases/latest/download/harness-init.skill
+  ```
+- 安装后在项目目录中输入 `/harness-init`，交互式选择技术栈和 AI 工具版本
+- Skill 从 GitHub 按需拉取对应 stack 文件，同时支持 CLAUDE.md 和 AGENTS.md
 
 ### `harness-init` 的设计约束
 

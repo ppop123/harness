@@ -117,28 +117,17 @@ class GenerateRepoContractTests(unittest.TestCase):
         self.assertNotIn("claude-progress.txt", agents_doc)
         self.assertNotIn("请先读 `AGENTS.md` 获取全局上下文", claude_doc)
 
-    def test_root_readme_recommends_thin_skill_then_load_prompt(self) -> None:
+    def test_root_readme_has_skill_install(self) -> None:
         self.assertTrue(hasattr(gen, "gen_root_readme"))
         readme = gen.gen_root_readme()
 
-        self.assertIn("### 方式 1：安装薄装载 Skill（推荐）", readme)
-        self.assertIn("skills/harness-init", readme)
+        self.assertIn("claude skill install", readme)
         self.assertIn("harness-init.skill", readme)
-        self.assertIn("只负责收集参数并从 GitHub 按需拉取当前栈文件", readme)
-        self.assertIn("### 方式 2：在项目目录装载", readme)
-        self.assertIn(
-            '从 https://github.com/ppop123/harness 装载 ts-nextjs 栈的 harness 工程结构到当前目录',
-            readme,
-        )
-        self.assertIn(
-            'curl -sL "$REPO/stacks/$STACK/codex/AGENTS.md" -o AGENTS.md',
-            readme,
-        )
-        self.assertIn(
-            'cp stacks/ts-nextjs/claude/CLAUDE.md your-project/CLAUDE.md',
-            readme,
-        )
-        self.assertNotIn("方式 1：Codex 一句话装载（推荐）", readme)
+        self.assertIn("/harness-init", readme)
+        self.assertNotIn("$skill-installer", readme)
+        self.assertNotIn("方式 2", readme)
+        self.assertNotIn("方式 3", readme)
+        self.assertNotIn("方式 4", readme)
         self.assertNotIn("\\n|", readme)
 
     def test_swift_check_command_and_stack_readme_text_are_clean(self) -> None:
