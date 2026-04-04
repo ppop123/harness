@@ -58,8 +58,6 @@ harness/
 
 ## 使用方式
 
-### 方式 1：通过 AI 工具装载（推荐）
-
 **Claude Code**：
 
 ```bash
@@ -74,35 +72,7 @@ claude skill install https://github.com/ppop123/harness/releases/latest/download
 codex "从 https://github.com/ppop123/harness 装载 ts-nextjs 栈的 harness 工程结构到当前目录"
 ```
 
-> 把 `ts-nextjs` 替换为你的技术栈 ID（见上方表格）
-
-### 方式 2：手动复制
-
-```bash
-git clone https://github.com/ppop123/harness.git
-cp stacks/ts-nextjs/claude/CLAUDE.md your-project/
-cp stacks/ts-nextjs/codex/AGENTS.md your-project/
-cp -r common/docs your-project/docs
-cp -r common/scripts your-project/scripts
-```
-
-### 方式 3：curl
-
-```bash
-STACK=ts-nextjs
-REPO=https://raw.githubusercontent.com/ppop123/harness/main
-mkdir -p docs scripts .github/workflows
-curl -sL "$REPO/stacks/$STACK/claude/CLAUDE.md" -o CLAUDE.md
-curl -sL "$REPO/stacks/$STACK/codex/AGENTS.md" -o AGENTS.md
-curl -sL "$REPO/stacks/$STACK/docs/architecture.md" -o docs/architecture.md
-curl -sL "$REPO/stacks/$STACK/docs/golden-principles.md" -o docs/golden-principles.md
-curl -sL "$REPO/common/docs/domain-model.md" -o docs/domain-model.md
-curl -sL "$REPO/stacks/$STACK/scripts/layer-check.sh" -o scripts/layer-check.sh
-curl -sL "$REPO/stacks/$STACK/scripts/init.sh" -o scripts/init.sh
-curl -sL "$REPO/stacks/$STACK/ci/ci.yml" -o .github/workflows/ci.yml
-curl -sL "$REPO/common/feature_list.json" -o feature_list.json
-curl -sL "$REPO/common/agent-progress.txt" -o agent-progress.txt
-```
+> 把 `ts-nextjs` 替换为你的技术栈 ID（见上��表格）
 
 ## Claude vs Codex：区别在哪？
 
