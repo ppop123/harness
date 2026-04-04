@@ -58,34 +58,20 @@ harness/
 
 ## 使用方式
 
-### 方式 1：一句话安装（推荐）
+### 方式 1：通过 AI 工具装载（推荐）
 
 **Claude Code**：
 
 ```bash
-# 1. 安装 Skill（只需一次）
-curl -sL https://github.com/ppop123/harness/releases/latest/download/harness-init.skill -o /tmp/harness-init.skill && claude skill install /tmp/harness-init.skill
-
-# 2. 在项目中使用
-/harness-init
+claude skill install https://github.com/ppop123/harness/releases/latest/download/harness-init.skill
 ```
 
-安装后在 Claude Code 中输入 `/harness-init` 或说"装载 harness"，交互式选择技术栈和工具版本，自动拉取最新模版。
+安装后在任何新项目目录中输入 `/harness-init`，交互式选择技术栈，Skill 自动从 GitHub 拉取对应模版。
 
 **Codex CLI**：
 
 ```bash
-STACK=ts-nextjs && REPO=https://raw.githubusercontent.com/ppop123/harness/main && \
-curl -sL "$REPO/stacks/$STACK/codex/AGENTS.md" -o AGENTS.md && \
-mkdir -p docs scripts && \
-curl -sL "$REPO/stacks/$STACK/docs/architecture.md" -o docs/architecture.md && \
-curl -sL "$REPO/stacks/$STACK/docs/golden-principles.md" -o docs/golden-principles.md && \
-curl -sL "$REPO/common/docs/domain-model.md" -o docs/domain-model.md && \
-curl -sL "$REPO/stacks/$STACK/scripts/layer-check.sh" -o scripts/layer-check.sh && \
-curl -sL "$REPO/stacks/$STACK/scripts/init.sh" -o scripts/init.sh && \
-curl -sL "$REPO/common/feature_list.json" -o feature_list.json && \
-curl -sL "$REPO/common/agent-progress.txt" -o agent-progress.txt && \
-echo "Harness installed. Run: bash scripts/init.sh"
+codex "从 https://github.com/ppop123/harness 装载 ts-nextjs 栈的 harness 工程结构到当前目录"
 ```
 
 > 把 `ts-nextjs` 替换为你的技术栈 ID（见上方表格）
@@ -94,31 +80,28 @@ echo "Harness installed. Run: bash scripts/init.sh"
 
 ```bash
 git clone https://github.com/ppop123/harness.git
-cp stacks/ts-nextjs/claude/CLAUDE.md your-project/CLAUDE.md
-cp stacks/ts-nextjs/codex/AGENTS.md your-project/AGENTS.md
+cp stacks/ts-nextjs/claude/CLAUDE.md your-project/
+cp stacks/ts-nextjs/codex/AGENTS.md your-project/
 cp -r common/docs your-project/docs
 cp -r common/scripts your-project/scripts
 ```
 
-### 方式 3：curl 完整初始化（全部文件）
+### 方式 3：curl
 
 ```bash
-REPO="https://raw.githubusercontent.com/ppop123/harness/main"
-STACK="ts-nextjs"
-
-curl -o CLAUDE.md "$REPO/stacks/$STACK/claude/CLAUDE.md"
-curl -o AGENTS.md "$REPO/stacks/$STACK/codex/AGENTS.md"
+STACK=ts-nextjs
+REPO=https://raw.githubusercontent.com/ppop123/harness/main
 mkdir -p docs scripts .github/workflows
-curl -o docs/architecture.md "$REPO/stacks/$STACK/docs/architecture.md"
-curl -o docs/golden-principles.md "$REPO/stacks/$STACK/docs/golden-principles.md"
-curl -o docs/domain-model.md "$REPO/common/docs/domain-model.md"
-curl -o scripts/audit-prompt.md "$REPO/common/scripts/audit-prompt.md"
-curl -o scripts/layer-check.sh "$REPO/stacks/$STACK/scripts/layer-check.sh"
-curl -o scripts/init.sh "$REPO/stacks/$STACK/scripts/init.sh"
-curl -o .github/workflows/ci.yml "$REPO/stacks/$STACK/ci/ci.yml"
-curl -o .pre-commit-config.yaml "$REPO/stacks/$STACK/config/pre-commit-config.yaml"
-curl -o feature_list.json "$REPO/common/feature_list.json"
-curl -o agent-progress.txt "$REPO/common/agent-progress.txt"
+curl -sL "$REPO/stacks/$STACK/claude/CLAUDE.md" -o CLAUDE.md
+curl -sL "$REPO/stacks/$STACK/codex/AGENTS.md" -o AGENTS.md
+curl -sL "$REPO/stacks/$STACK/docs/architecture.md" -o docs/architecture.md
+curl -sL "$REPO/stacks/$STACK/docs/golden-principles.md" -o docs/golden-principles.md
+curl -sL "$REPO/common/docs/domain-model.md" -o docs/domain-model.md
+curl -sL "$REPO/stacks/$STACK/scripts/layer-check.sh" -o scripts/layer-check.sh
+curl -sL "$REPO/stacks/$STACK/scripts/init.sh" -o scripts/init.sh
+curl -sL "$REPO/stacks/$STACK/ci/ci.yml" -o .github/workflows/ci.yml
+curl -sL "$REPO/common/feature_list.json" -o feature_list.json
+curl -sL "$REPO/common/agent-progress.txt" -o agent-progress.txt
 ```
 
 ## Claude vs Codex：区别在哪？
