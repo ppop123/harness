@@ -1,0 +1,9 @@
+# detekt.yml
+complexity:
+  ComplexMethod:
+    threshold: 10
+  LongMethod:
+    threshold: 50
+style:
+  ForbiddenComment:
+    active: true

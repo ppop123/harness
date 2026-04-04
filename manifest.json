@@ -1,0 +1,97 @@
+{
+  "generated": "2026-04-04",
+  "stacks": {
+    "ts-nextjs": {
+      "name": "TypeScript + Next.js",
+      "category": "fullstack-web",
+      "lang": "TypeScript"
+    },
+    "ts-node": {
+      "name": "TypeScript + Node.js API",
+      "category": "backend-api",
+      "lang": "TypeScript"
+    },
+    "python-fastapi": {
+      "name": "Python + FastAPI",
+      "category": "backend-api",
+      "lang": "Python"
+    },
+    "python-django": {
+      "name": "Python + Django",
+      "category": "fullstack-web",
+      "lang": "Python"
+    },
+    "python-ai": {
+      "name": "Python AI / Data Science",
+      "category": "ai-data",
+      "lang": "Python"
+    },
+    "java-spring": {
+      "name": "Java + Spring Boot",
+      "category": "backend-api",
+      "lang": "Java"
+    },
+    "csharp-dotnet": {
+      "name": "C# + ASP.NET Core",
+      "category": "backend-api",
+      "lang": "C#"
+    },
+    "go": {
+      "name": "Go",
+      "category": "backend-api",
+      "lang": "Go"
+    },
+    "rust": {
+      "name": "Rust",
+      "category": "backend-systems",
+      "lang": "Rust"
+    },
+    "swift-ios": {
+      "name": "Swift + SwiftUI",
+      "category": "mobile",
+      "lang": "Swift"
+    },
+    "kotlin-android": {
+      "name": "Kotlin + Android",
+      "category": "mobile",
+      "lang": "Kotlin"
+    },
+    "dart-flutter": {
+      "name": "Dart + Flutter",
+      "category": "mobile-crossplatform",
+      "lang": "Dart"
+    },
+    "react-native": {
+      "name": "React Native (TypeScript)",
+      "category": "mobile-crossplatform",
+      "lang": "TypeScript"
+    }
+  },
+  "combos": {
+    "nextjs-python-api": {
+      "name": "Next.js 前端 + Python FastAPI 后端",
+      "frontend": "ts-nextjs",
+      "backend": "python-fastapi"
+    },
+    "react-go-api": {
+      "name": "React SPA + Go 后端",
+      "frontend": "ts-nextjs",
+      "backend": "go"
+    },
+    "flutter-fastapi": {
+      "name": "Flutter 客户端 + FastAPI 后端",
+      "frontend": "dart-flutter",
+      "backend": "python-fastapi"
+    },
+    "nextjs-spring": {
+      "name": "Next.js 前端 + Spring Boot 后端",
+      "frontend": "ts-nextjs",
+      "backend": "java-spring"
+    },
+    "rn-node": {
+      "name": "React Native 客户端 + Node.js API",
+      "frontend": "react-native",
+      "backend": "ts-node"
+    }
+  }
+}

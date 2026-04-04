@@ -1,0 +1,5 @@
+<!-- .editorconfig -->
+[*.cs]
+dotnet_analyzer_diagnostic.severity = warning
+dotnet_diagnostic.CA1062.severity = error  # Validate arguments
+dotnet_diagnostic.CS8600.severity = error  # Nullable reference

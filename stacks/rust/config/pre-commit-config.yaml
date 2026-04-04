@@ -1,0 +1,23 @@
+# .pre-commit-config.yaml
+# Install: pip install pre-commit && pre-commit install
+repos:
+  - repo: local
+    hooks:
+      - id: cargo-clippy
+        name: Clippy
+        entry: cargo clippy -- -D warnings
+        language: system
+        types: [rust]
+        pass_filenames: false
+      - id: cargo-fmt
+        name: Rustfmt
+        entry: cargo fmt --check
+        language: system
+        types: [rust]
+        pass_filenames: false
+      - id: cargo-test
+        name: Tests
+        entry: cargo test
+        language: system
+        types: [rust]
+        pass_filenames: false

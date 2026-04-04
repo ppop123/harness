@@ -1,0 +1,28 @@
+# 打包文件（通过 GitHub Release 分发）
+*.zip
+*.skill
+
+# macOS
+.DS_Store
+**/.DS_Store
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.ruff_cache/
+.mypy_cache/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Claude Code / Codex 本地配置
+.claude/
+
+# AI agent 工作过程文件（不发布）
+findings.md
+progress.md
+task_plan.md

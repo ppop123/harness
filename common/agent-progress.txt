@@ -1,0 +1,33 @@
+# Agent Progress Log
+#
+# Purpose: Track work across multiple AI agent sessions.
+# Each session MUST append an entry before ending.
+# Next session MUST read this file before starting work.
+#
+# Format:
+# === Session [N] — [DATE] ===
+# Goal: What was attempted
+# Done: What was completed
+# Decisions: Key choices made and why
+# Blocked: What couldn't be finished (and why)
+# Next: What the next session should do first
+# Files changed: List of modified files
+# Tests: pass/fail status
+# ================================
+
+=== Session 1 — [DATE] ===
+Goal: [Initial setup / Feature X / Bug fix Y]
+Done:
+  - [What was completed]
+Decisions:
+  - [Choice made] — because [reason]
+Blocked:
+  - [Issue] — needs [resolution]
+Next:
+  - [ ] [First thing next session should do]
+  - [ ] [Second thing]
+Files changed:
+  - [file1.py] (new)
+  - [file2.py] (modified)
+Tests: all passing / N failures
+================================

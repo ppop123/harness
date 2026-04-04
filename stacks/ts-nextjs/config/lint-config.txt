@@ -1,0 +1,10 @@
+{
+  "extends": ["next/core-web-vitals", "plugin:@typescript-eslint/recommended-type-checked"],
+  "rules": {
+    "@typescript-eslint/no-explicit-any": "error",
+    "@typescript-eslint/no-floating-promises": "error",
+    "no-empty": ["error", {"allowEmptyCatch": false}],
+    "complexity": ["warn", 10],
+    "max-lines-per-function": ["warn", {"max": 50, "skipBlankLines": true, "skipComments": true}]
+  }
+}

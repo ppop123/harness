@@ -1,0 +1,6 @@
+[tool.ruff.lint]
+select = ["E","W","F","I","B","C4","UP","N","ANN","S","DJ"]
+
+[tool.mypy]
+strict = true
+plugins = ["mypy_django_plugin.main"]

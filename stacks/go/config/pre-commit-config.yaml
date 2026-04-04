@@ -1,0 +1,20 @@
+# .pre-commit-config.yaml
+# Install: pip install pre-commit && pre-commit install
+repos:
+  - repo: https://github.com/golangci/golangci-lint
+    rev: v1.59.0
+    hooks:
+      - id: golangci-lint
+  - repo: local
+    hooks:
+      - id: go-test
+        name: Go tests
+        entry: go test ./... -race -short
+        language: system
+        types: [go]
+        pass_filenames: false
+      - id: layer-check
+        name: Dependency layer check
+        entry: bash scripts/layer-check.sh .
+        language: system
+        pass_filenames: false

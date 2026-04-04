@@ -1,0 +1,8 @@
+# clippy.toml
+cognitive-complexity-threshold = 10
+
+# Cargo.toml
+[lints.clippy]
+unwrap_used = "deny"
+expect_used = "warn"
+missing_docs = "warn" 

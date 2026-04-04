@@ -1,0 +1,8 @@
+# .swiftlint.yml
+opt_in_rules:
+  - force_unwrapping
+  - implicitly_unwrapped_optional
+  - missing_docs
+disabled_rules: []
+line_length: 120
+function_body_length: 50

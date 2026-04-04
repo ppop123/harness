@@ -1,0 +1,15 @@
+# .pre-commit-config.yaml
+# Install: pip install pre-commit && pre-commit install
+repos:
+  - repo: local
+    hooks:
+      - id: check
+        name: Full check (Java + Spring Boot)
+        entry: bash -c './mvnw verify'
+        language: system
+        pass_filenames: false
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.6.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer

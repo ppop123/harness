@@ -1,0 +1,8 @@
+{
+  "extends": ["plugin:@typescript-eslint/recommended-type-checked"],
+  "rules": {
+    "@typescript-eslint/no-explicit-any": "error",
+    "@typescript-eslint/no-floating-promises": "error",
+    "no-empty": ["error", {"allowEmptyCatch": false}]
+  }
+}

@@ -1,0 +1,13 @@
+# analysis_options.yaml
+analyzer:
+  strong-mode:
+    implicit-casts: false
+    implicit-dynamic: false
+  errors:
+    missing_return: error
+    dead_code: warning
+linter:
+  rules:
+    - prefer_final_locals
+    - avoid_dynamic_calls
+    - always_declare_return_types

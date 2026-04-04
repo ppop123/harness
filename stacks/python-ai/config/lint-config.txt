@@ -1,0 +1,7 @@
+[tool.ruff.lint]
+select = ["E","W","F","I","B","UP","N","ANN"]
+ignore = ["ANN101"]
+
+[tool.mypy]
+warn_return_any = true
+disallow_untyped_defs = true
