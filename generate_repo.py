@@ -2180,7 +2180,7 @@ curl -sL https://github.com/ppop123/harness/releases/latest/download/harness-ini
 /harness-init
 ```
 
-安装后在 Claude Code 中输入 `/harness-init`，交互式选择技术栈、AI 工具和项目名称，自动拉取最新模版。
+安装后在 Claude Code 中输入 `/harness-init` 或说"装载 harness"，交互式选择技术栈和工具版本，自动拉取最新模版。
 
 **Codex CLI**：
 
