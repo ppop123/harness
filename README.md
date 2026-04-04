@@ -58,37 +58,51 @@ harness/
 
 ## 使用方式
 
-### 方式 1：手动复制
+### 方式 1：一句话安装（推荐）
+
+**Claude Code**：
 
 ```bash
-# 1. 克隆仓库
-git clone https://github.com/ppop123/harness.git
+curl -sL https://github.com/ppop123/harness/releases/latest/download/harness-init.skill -o /tmp/harness-init.skill && claude skill install /tmp/harness-init.skill
+# 然后对 Claude 说"初始化项目"，交互式选择技术栈
+```
 
-# 2. 选择你的技术栈（例如 ts-nextjs）
+**Codex CLI**：
+
+```bash
+STACK=ts-nextjs && REPO=https://raw.githubusercontent.com/ppop123/harness/main && \
+curl -sL "$REPO/stacks/$STACK/codex/AGENTS.md" -o AGENTS.md && \
+mkdir -p docs scripts && \
+curl -sL "$REPO/stacks/$STACK/docs/architecture.md" -o docs/architecture.md && \
+curl -sL "$REPO/stacks/$STACK/docs/golden-principles.md" -o docs/golden-principles.md && \
+curl -sL "$REPO/common/docs/domain-model.md" -o docs/domain-model.md && \
+curl -sL "$REPO/stacks/$STACK/scripts/layer-check.sh" -o scripts/layer-check.sh && \
+curl -sL "$REPO/stacks/$STACK/scripts/init.sh" -o scripts/init.sh && \
+curl -sL "$REPO/common/feature_list.json" -o feature_list.json && \
+curl -sL "$REPO/common/agent-progress.txt" -o agent-progress.txt && \
+echo "Harness installed. Run: bash scripts/init.sh"
+```
+
+> 把 `ts-nextjs` 替换为你的技术栈 ID（见上方表格）
+
+### 方式 2：手动复制
+
+```bash
+git clone https://github.com/ppop123/harness.git
 cp stacks/ts-nextjs/claude/CLAUDE.md your-project/CLAUDE.md
 cp stacks/ts-nextjs/codex/AGENTS.md your-project/AGENTS.md
 cp -r common/docs your-project/docs
 cp -r common/scripts your-project/scripts
-cp common/agent-progress.txt your-project/agent-progress.txt
 ```
 
-### 方式 2：通过 Cowork Skill 自动加载
-
-安装 `harness-init.skill` 后，对 Claude 说"初始化项目"，自动从本仓库拉取最新模版。
-
-### 方式 3：curl 快速初始化
+### 方式 3：curl 完整初始化（全部文件）
 
 ```bash
-# 替换 ppop123 和 STACK_NAME
 REPO="https://raw.githubusercontent.com/ppop123/harness/main"
 STACK="ts-nextjs"
 
-# Claude / Claude Code
 curl -o CLAUDE.md "$REPO/stacks/$STACK/claude/CLAUDE.md"
-
-# Codex / Cursor / Windsurf
 curl -o AGENTS.md "$REPO/stacks/$STACK/codex/AGENTS.md"
-
 mkdir -p docs scripts .github/workflows
 curl -o docs/architecture.md "$REPO/stacks/$STACK/docs/architecture.md"
 curl -o docs/golden-principles.md "$REPO/stacks/$STACK/docs/golden-principles.md"
