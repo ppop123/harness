@@ -56,23 +56,15 @@ harness/
 └── combos/              # 常用前后端组合
 ```
 
-## 使用方式
-
-**Claude Code**：
+## 安装
 
 ```bash
 claude skill install https://github.com/ppop123/harness/releases/latest/download/harness-init.skill
 ```
 
-安装后在任何新项目目录中输入 `/harness-init`，交互式选择技术栈，Skill 自动从 GitHub 拉取对应模版。
+在任何新项目目录中输入 `/harness-init`，交互式选择技术栈和 AI 工具（Claude / Codex / 都要），Skill 自动从 GitHub 拉取对应模版到当前目录。
 
-**Codex CLI**：
-
-```bash
-codex "从 https://github.com/ppop123/harness 装载 ts-nextjs 栈的 harness 工程结构到当前目录"
-```
-
-> 把 `ts-nextjs` 替换为你的技术栈 ID（见上��表格）
+> Codex 用户同样通过此方式安装——Skill 会同时生成 CLAUDE.md 和 AGENTS.md。
 
 ## Claude vs Codex：区别在哪？
 
