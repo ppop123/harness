@@ -1,6 +1,7 @@
 import subprocess
 import tempfile
 import unittest
+import zipfile
 from pathlib import Path
 
 import generate_repo as gen
@@ -116,19 +117,28 @@ class GenerateRepoContractTests(unittest.TestCase):
         self.assertNotIn("claude-progress.txt", agents_doc)
         self.assertNotIn("请先读 `AGENTS.md` 获取全局上下文", claude_doc)
 
-    def test_root_readme_has_separate_claude_and_codex_bootstrap_paths(self) -> None:
+    def test_root_readme_recommends_thin_skill_then_load_prompt(self) -> None:
         self.assertTrue(hasattr(gen, "gen_root_readme"))
         readme = gen.gen_root_readme()
 
+        self.assertIn("### 方式 1：安装薄装载 Skill（推荐）", readme)
+        self.assertIn("skills/harness-init", readme)
+        self.assertIn("harness-init.skill", readme)
+        self.assertIn("只负责收集参数并从 GitHub 按需拉取当前栈文件", readme)
+        self.assertIn("### 方式 2：在项目目录装载", readme)
         self.assertIn(
-            'curl -o CLAUDE.md "$REPO/stacks/$STACK/claude/CLAUDE.md"',
+            '从 https://github.com/ppop123/harness 装载 ts-nextjs 栈的 harness 工程结构到当前目录',
             readme,
         )
         self.assertIn(
-            'curl -o AGENTS.md "$REPO/stacks/$STACK/codex/AGENTS.md"',
+            'curl -sL "$REPO/stacks/$STACK/codex/AGENTS.md" -o AGENTS.md',
             readme,
         )
-        self.assertNotIn("$TOOL/CLAUDE.md", readme)
+        self.assertIn(
+            'cp stacks/ts-nextjs/claude/CLAUDE.md your-project/CLAUDE.md',
+            readme,
+        )
+        self.assertNotIn("方式 1：Codex 一句话装载（推荐）", readme)
         self.assertNotIn("\\n|", readme)
 
     def test_swift_check_command_and_stack_readme_text_are_clean(self) -> None:
@@ -143,6 +153,15 @@ class GenerateRepoContractTests(unittest.TestCase):
                 self.assertLessEqual(len(content.splitlines()), 100)
                 self.assertNotIn("Codex-progress.txt", content)
                 self.assertNotIn("Codex/AGENTS.md", content)
+
+    def test_stack_readme_recommends_stack_specific_load_prompt_after_skill_install(self) -> None:
+        readme = gen.gen_readme("ts-nextjs", gen.STACKS["ts-nextjs"])
+        self.assertIn("需先安装 `harness-init` skill", readme)
+        self.assertIn(
+            '从 https://github.com/ppop123/harness 装载 ts-nextjs 栈的 harness 工程结构到当前目录',
+            readme,
+        )
+        self.assertIn("Claude 用户可复制 `claude/CLAUDE.md`", readme)
 
     def test_all_generated_stack_entry_docs_use_neutral_progress_file_and_stay_short(self) -> None:
         for stack in gen.STACKS.values():
@@ -173,6 +192,32 @@ class GenerateRepoContractTests(unittest.TestCase):
                         0,
                         msg=f"generated shell script should be parseable:\n{result.stderr}",
                     )
+
+    def test_harness_init_skill_source_is_thin_loader(self) -> None:
+        skill_md = (ROOT / "skills" / "harness-init" / "SKILL.md").read_text(encoding="utf-8")
+        self.assertIn("从 GitHub 按需拉取", skill_md)
+        self.assertIn("不要在 skill 中内置各技术栈模板文件", skill_md)
+        self.assertNotIn("本 skill 自带", skill_md)
+        self.assertNotIn("assets/", skill_md)
+
+    def test_harness_init_skill_build_contains_no_bundled_assets(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            output_path = Path(tmp) / "harness-init.skill"
+            result = subprocess.run(
+                [
+                    "python3",
+                    str(ROOT / "scripts" / "build_harness_init_skill.py"),
+                    "--output",
+                    str(output_path),
+                ],
+                capture_output=True,
+                text=True,
+                check=False,
+            )
+            self.assertEqual(result.returncode, 0, msg=result.stderr)
+            with zipfile.ZipFile(output_path) as archive:
+                names = sorted(archive.namelist())
+            self.assertEqual(names, ["harness-init/", "harness-init/SKILL.md"])
 
 
 if __name__ == "__main__":

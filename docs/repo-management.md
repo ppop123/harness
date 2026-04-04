@@ -39,7 +39,15 @@
 - 审计 / 文档整理 prompt
 - `.env.example`
 
-### 3. 根级入口文档
+### 3. `skills/harness-init/`
+
+`skills/harness-init/SKILL.md` 是 thin loader skill 的源码入口。
+
+- 修改 skill 行为，改这里
+- 重新打 release asset，运行 `python3 scripts/build_harness_init_skill.py`
+- 不要直接把 `harness-init.skill` 当成唯一事实来源
+
+### 4. 根级入口文档
 
 根 `AGENTS.md` 和 `CLAUDE.md` 只做短入口，不承载完整维护手册。完整说明统一写在这里，避免双份长文档漂移。
 
@@ -83,6 +91,23 @@
 - `AGENTS.md` 更适合统一入口和机械化执行
 - 应优先强调固定验证命令、事实来源和修改边界
 - 不应引用带平台品牌色彩的共享工件名
+
+### 推荐安装入口
+
+- 推荐流程是两步：
+  1. 先安装一个很薄的 `harness-init` skill
+  2. 再在具体项目里让它从 GitHub 按需拉取所需 stack 文件
+- 对 Codex，推荐通过内置的 `$skill-installer` 从 `ppop123/harness` 的 `skills/harness-init` 安装这个 skill。
+- 对 Claude，可以继续通过 release asset 安装 `harness-init.skill`，但这个 asset 也必须是 thin loader，而不是模板打包文件。
+- 项目装载阶段的推荐请求形态是：
+  `从 https://github.com/ppop123/harness 装载 ts-nextjs 栈的 harness 工程结构到当前目录`
+
+### `harness-init` 的设计约束
+
+- `harness-init.skill` 只负责收集参数、决定平台版本、从 GitHub 拉取文件。
+- 不要在 skill 中内置各技术栈模板文件，不要再放 `assets/ts-nextjs/`、`assets/common/` 这类副本。
+- GitHub 上的 `stacks/` 与 `common/` 才是模板事实来源；skill 只是 loader。
+- skill 的源码应保存在仓库里，例如 `skills/harness-init/SKILL.md`，而不是只保留一个二进制 `.skill` 文件。
 
 ### 共享工件命名
 
@@ -137,7 +162,9 @@ python3 -m unittest discover -s tests -q
 
 - 生成器改动已重新生成
 - 根 README 已更新
-- `harness-init.skill` 没有引用过期路径
+- `skills/harness-init/SKILL.md` 与 README 描述一致
+- `python3 scripts/build_harness_init_skill.py` 能生成最新的 thin `harness-init.skill`
+- skill 包中没有内置 stack/common 资产副本
 - 代表性 stack README 没有乱码或路径漂移
 
 未来如需继续加强严格性，优先顺序建议是：

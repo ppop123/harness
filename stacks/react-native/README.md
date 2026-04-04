@@ -19,7 +19,15 @@
 
 ## 使用方法
 
-1. Claude 用户复制 `claude/CLAUDE.md` 到项目根目录；Codex 用户复制 `codex/AGENTS.md`
+**推荐装载**（需先安装 `harness-init` skill）：
+
+```text
+从 https://github.com/ppop123/harness 装载 react-native 栈的 harness 工程结构到当前目录
+```
+
+**手动方式**：
+
+1. Claude 用户可复制 `claude/CLAUDE.md` 到项目根目录；Codex 用户可复制 `codex/AGENTS.md`
 2. 将 `config/` 中的配置合并到你的项目
 3. 将 `common/docs/` 复制到 `docs/`
 4. 填写 `[PROJECT_NAME]` 等占位符

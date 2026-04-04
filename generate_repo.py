@@ -2044,6 +2044,10 @@ repos:
 """
 
 
+def harness_load_prompt(stack_id: str) -> str:
+    return f"从 https://github.com/ppop123/harness 装载 {stack_id} 栈的 harness 工程结构到当前目录"
+
+
 def gen_readme(stack_id: str, stack: dict) -> str:
     return f"""# {stack['name']} — Harness Engineering 模版
 
@@ -2066,7 +2070,15 @@ def gen_readme(stack_id: str, stack: dict) -> str:
 
 ## 使用方法
 
-1. Claude 用户复制 `claude/CLAUDE.md` 到项目根目录；Codex 用户复制 `codex/AGENTS.md`
+**推荐装载**（需先安装 `harness-init` skill）：
+
+```text
+{harness_load_prompt(stack_id)}
+```
+
+**手动方式**：
+
+1. Claude 用户可复制 `claude/CLAUDE.md` 到项目根目录；Codex 用户可复制 `codex/AGENTS.md`
 2. 将 `config/` 中的配置合并到你的项目
 3. 将 `common/docs/` 复制到 `docs/`
 4. 填写 `[PROJECT_NAME]` 等占位符
@@ -2168,21 +2180,42 @@ harness/
 
 ## 使用方式
 
-### 方式 1：一句话安装（推荐）
+### 方式 1：安装薄装载 Skill（推荐）
+
+**Codex / Cursor / Windsurf**：
+
+```text
+请用 $skill-installer 从 ppop123/harness 的 skills/harness-init 安装 harness-init
+```
 
 **Claude Code**：
 
 ```bash
-# 1. 安装 Skill（只需一次）
 curl -sL https://github.com/ppop123/harness/releases/latest/download/harness-init.skill -o /tmp/harness-init.skill && claude skill install /tmp/harness-init.skill
-
-# 2. 在项目中使用
-/harness-init
 ```
 
-安装后在 Claude Code 中输入 `/harness-init` 或说"装载 harness"，交互式选择技术栈和工具版本，自动拉取最新模版。
+安装完成后，`harness-init` 只负责收集参数并从 GitHub 按需拉取当前栈文件，不内置栈模板副本。
 
-**Codex CLI**：
+### 方式 2：在项目目录装载
+
+```text
+{harness_load_prompt("ts-nextjs")}
+```
+
+> 把 `ts-nextjs` 替换为你的技术栈 ID（见上方表格）。
+> 你也可以在请求里明确写 `Claude`、`Codex` 或 `都要`，skill 会据此决定写入 `CLAUDE.md`、`AGENTS.md` 或两者都写。
+
+### 方式 3：手动复制
+
+```bash
+git clone https://github.com/ppop123/harness.git
+cp stacks/ts-nextjs/claude/CLAUDE.md your-project/CLAUDE.md
+cp stacks/ts-nextjs/codex/AGENTS.md your-project/AGENTS.md
+cp -r common/docs your-project/docs
+cp -r common/scripts your-project/scripts
+```
+
+### 方式 4：curl 完整初始化（fallback）
 
 ```bash
 STACK=ts-nextjs && REPO=https://raw.githubusercontent.com/ppop123/harness/main && \\
@@ -2199,37 +2232,6 @@ echo "Harness installed. Run: bash scripts/init.sh"
 ```
 
 > 把 `ts-nextjs` 替换为你的技术栈 ID（见上方表格）
-
-### 方式 2：手动复制
-
-```bash
-git clone https://github.com/ppop123/harness.git
-cp stacks/ts-nextjs/claude/CLAUDE.md your-project/CLAUDE.md
-cp stacks/ts-nextjs/codex/AGENTS.md your-project/AGENTS.md
-cp -r common/docs your-project/docs
-cp -r common/scripts your-project/scripts
-```
-
-### 方式 3：curl 完整初始化（全部文件）
-
-```bash
-REPO="https://raw.githubusercontent.com/ppop123/harness/main"
-STACK="ts-nextjs"
-
-curl -o CLAUDE.md "$REPO/stacks/$STACK/claude/CLAUDE.md"
-curl -o AGENTS.md "$REPO/stacks/$STACK/codex/AGENTS.md"
-mkdir -p docs scripts .github/workflows
-curl -o docs/architecture.md "$REPO/stacks/$STACK/docs/architecture.md"
-curl -o docs/golden-principles.md "$REPO/stacks/$STACK/docs/golden-principles.md"
-curl -o docs/domain-model.md "$REPO/common/docs/domain-model.md"
-curl -o scripts/audit-prompt.md "$REPO/common/scripts/audit-prompt.md"
-curl -o scripts/layer-check.sh "$REPO/stacks/$STACK/scripts/layer-check.sh"
-curl -o scripts/init.sh "$REPO/stacks/$STACK/scripts/init.sh"
-curl -o .github/workflows/ci.yml "$REPO/stacks/$STACK/ci/ci.yml"
-curl -o .pre-commit-config.yaml "$REPO/stacks/$STACK/config/pre-commit-config.yaml"
-curl -o feature_list.json "$REPO/common/feature_list.json"
-curl -o {PROGRESS_FILE} "$REPO/common/{PROGRESS_FILE}"
-```
 
 ## Claude vs Codex：区别在哪？
 
