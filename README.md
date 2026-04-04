@@ -63,9 +63,14 @@ harness/
 **Claude Code**：
 
 ```bash
+# 1. 安装 Skill（只需一次）
 curl -sL https://github.com/ppop123/harness/releases/latest/download/harness-init.skill -o /tmp/harness-init.skill && claude skill install /tmp/harness-init.skill
-# 然后对 Claude 说"初始化项目"，交互式选择技术栈
+
+# 2. 在项目中使用
+/harness-init
 ```
+
+安装后在 Claude Code 中输入 `/harness-init`，交互式选择技术栈、AI 工具和项目名称，自动拉取最新模版到当前目录。
 
 **Codex CLI**：
 
