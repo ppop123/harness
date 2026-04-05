@@ -184,8 +184,8 @@ class GenerateRepoContractTests(unittest.TestCase):
 
     def test_harness_init_skill_source_is_thin_loader(self) -> None:
         skill_md = (ROOT / "skills" / "harness-init" / "SKILL.md").read_text(encoding="utf-8")
-        self.assertIn("从 GitHub 按需拉取", skill_md)
-        self.assertIn("不要在 skill 中内置各技术栈模板文件", skill_md)
+        self.assertIn("从 GitHub", skill_md)
+        self.assertIn("实时拉取", skill_md)
         self.assertNotIn("本 skill 自带", skill_md)
         self.assertNotIn("assets/", skill_md)
 

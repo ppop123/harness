@@ -1,25 +1,20 @@
 ---
 name: harness-init
 description: |
-  安装一次、重复使用的 Harness Engineering 薄装载 skill。
-  当用户要求“装载 harness”“加载某个 stack 的 harness 结构”“从 GitHub 拉取 harness 模板”时使用。
-  本 skill 只负责收集参数并从 GitHub 按需拉取当前栈文件，不内置栈模板副本。
+  为新项目一键装载 Harness Engineering 工程结构。
+  支持 13 种技术栈，自动从 GitHub 拉取 CLAUDE.md、AGENTS.md、架构文档、lint 配置、CI 模版等。
+  输入 /harness-init 开始，会问你选哪个技术栈。
 ---
 
 # Harness Init
 
-`harness-init` 是一个 thin loader。
+为当前项目装载 Harness Engineering 工程结构：选一个技术栈，从 GitHub 拉取对应的 AI 工作指令、架构文档、lint 配置、CI 模版到当前目录。
 
-- 安装阶段：只安装这一个 skill
-- 项目阶段：根据用户请求，从 GitHub 按需拉取 stack 文件到当前目录
-- 事实来源：`https://github.com/ppop123/harness`
+## 规则
 
-## 设计约束
-
-- 从 GitHub 按需拉取，不要依赖 skill 内部模板副本。
-- 不要在 skill 中内置各技术栈模板文件。
-- 不要静默回退到本地旧副本；GitHub 拉取失败时，要明确告诉用户并停止。
-- 不要无提示覆盖用户已有文件；若目标文件已存在，先确认覆盖策略。
+- 所有文件从 GitHub 实时拉取，不用本地缓存
+- 拉取失败要明确告诉用户，不要静默跳过
+- 目标文件已存在时先问用户要不要覆盖
 
 ## 必要输入
 
