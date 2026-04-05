@@ -1608,19 +1608,10 @@ def _install_cmd(stack: dict) -> str:
 def gen_feature_list_json() -> str:
     """Generate feature_list.json template for cross-session progress tracking."""
     return json.dumps({
-        "_comment": "Feature tracking for AI agents. harness-init 适配时会清空示例内容。",
+        "_comment": "功能追踪。harness-init 装载时生成，每个 session 结束后更新。",
         "project": "[PROJECT_NAME]",
         "last_updated": "[DATE]",
         "features": [
-            {
-                "id": "F-001",
-                "name": "[第一个功能]",
-                "description": "[功能描述]",
-                "status": "not_started",
-                "acceptance_criteria": [],
-                "files_touched": [],
-                "notes": ""
-            }
         ],
         "status_values": ["not_started", "in_progress", "blocked", "testing", "done"]
     }, ensure_ascii=False, indent=2)

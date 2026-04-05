@@ -41,7 +41,7 @@
 
 ### 3. `skills/harness-init/`
 
-`skills/harness-init/SKILL.md` 是 thin loader skill 的源码入口。
+`skills/harness-init/SKILL.md` 是 harness-init Skill 的源码入口。
 
 - 修改 skill 行为，改这里
 - 重新打 release asset，运行 `python3 scripts/build_harness_init_skill.py`
