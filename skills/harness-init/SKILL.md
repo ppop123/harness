@@ -1,158 +1,305 @@
 ---
 name: harness-init
 description: |
-  为当前项目装载 Harness Engineering 工程结构。
-  支持 13 种技术栈。自动拉取模版后会扫描项目实际情况并适配。
-  输入 /harness-init 开始。
+  为当前项目生成 Harness Engineering 工程结构。
+  先扫描项目再生成，不拉预置模版。输入 /harness-init 开始。
 ---
 
 # Harness Init
 
-为当前项目装载 Harness Engineering 工程结构。拉取模版只是第一步，**必须根据项目实际情况适配所有文件**。
+为当前项目生成量身定制的 Harness Engineering 工程结构。
 
-## 核心原则
+**核心原则：先扫描，再生成。不拉固定模版。**
 
-模版是起点，不是终点。装载完的文件必须能直接跑，不能留着模版里的假命令、假目录、假实体让 agent 跑偏。
+所有生成的文件必须反映项目的真实情况——真实的包管理器、真实的目录结构、真实的实体、真实的命令。生成出来的 init.sh 必须能直接跑通，layer-check.sh 必须检查真实目录。
 
-## 规则
+---
 
-- 所有文件从 GitHub 实时拉取，不用本地缓存
-- 拉取失败要明确告诉用户并停止
-- 目标文件已存在时先问用户要不要覆盖
-- **拉取后必须执行项目适配（Step 5），不能跳过**
+## 执行流程
 
-## 必要输入
+### Phase 1：扫描项目
 
-开始前确认这些参数（能推断就不问）：
+在做任何事之前，先收集项目的完整画像。
 
-1. `stack_id` — 技术栈 ID（见下方列表）
-2. `platform` — `claude` / `codex` / `both`（默认按当前平台推断）
+#### 1.1 技术栈检测
 
-可选参数（有默认值）：
-- `repo_url` — 默认 `https://github.com/ppop123/harness`
-- `ref` — 默认 `main`
-
-## 支持的 stack ID
-
-`ts-nextjs` `ts-node` `python-fastapi` `python-django` `python-ai` `java-spring` `csharp-dotnet` `go` `rust` `swift-ios` `kotlin-android` `dart-flutter` `react-native`
-
-## 执行步骤
-
-### Step 1：收集参数
-
-解析用户请求中的 stack_id 和 platform。如果能从当前项目推断就不问。
-
-### Step 2：创建目录
+扫描以下文件确定语言和框架：
 
 ```
-docs/  docs/tech-decisions/  scripts/  .github/workflows/
+package.json / tsconfig.json → TypeScript (Next.js / Node / React Native / Expo)
+pyproject.toml / setup.py / Pipfile → Python (FastAPI / Django / AI)
+go.mod → Go
+Cargo.toml → Rust
+pom.xml / build.gradle → Java / Kotlin
+*.csproj / *.sln → C# / .NET
+Package.swift → Swift
+pubspec.yaml → Dart / Flutter
 ```
 
-### Step 3：从 GitHub 拉取文件
+如果检测不到或有多个，问用户。
 
-raw 基地址：`https://raw.githubusercontent.com/ppop123/harness/main`
+#### 1.2 工具链检测
 
-**入口文件**（按 platform 选择）：
-- `claude`：`stacks/$STACK/claude/CLAUDE.md` → `CLAUDE.md`
-- `codex`：`stacks/$STACK/codex/AGENTS.md` → `AGENTS.md`
-- `both`：两份都拉
+```
+包管理器：pnpm-lock.yaml / yarn.lock / package-lock.json / Cargo.lock / go.sum / poetry.lock / uv.lock / pubspec.lock
+Linter：biome.json / biome.jsonc / .eslintrc* / eslint.config.* / ruff.toml / pyproject.toml[tool.ruff] / .golangci.yml / clippy.toml / .swiftlint.yml / detekt.yml
+Formatter：biome.json / .prettierrc* / rustfmt.toml / pyproject.toml[tool.ruff.format]
+Test runner：vitest.config* / jest.config* / pytest.ini / pyproject.toml[tool.pytest] / Cargo.toml / go test
+Type checker：tsconfig.json(strict) / mypy.ini / pyproject.toml[tool.mypy]
+```
 
-**栈文件**：
-- `stacks/$STACK/docs/architecture.md` → `docs/architecture.md`
-- `stacks/$STACK/docs/golden-principles.md` → `docs/golden-principles.md`
-- `stacks/$STACK/docs/onboarding.md` → `docs/onboarding.md`
-- `stacks/$STACK/scripts/layer-check.sh` → `scripts/layer-check.sh`
-- `stacks/$STACK/scripts/init.sh` → `scripts/init.sh`
-- `stacks/$STACK/ci/ci.yml` → `.github/workflows/ci.yml`
-- `stacks/$STACK/config/pre-commit-config.yaml` → `.pre-commit-config.yaml`
+读 package.json 的 scripts 字段，确认 dev / lint / test / build 的真实命令。
 
-**通用文件**：
-- `common/docs/domain-model.md` → `docs/domain-model.md`
-- `common/docs/tech-decisions/000-template.md` → `docs/tech-decisions/000-template.md`
-- `common/scripts/audit-prompt.md` → `scripts/audit-prompt.md`
-- `common/scripts/doc-gardening-prompt.md` → `scripts/doc-gardening-prompt.md`
-- `common/scripts/new-feature-prompt.md` → `scripts/new-feature-prompt.md`
-- `common/feature_list.json` → `feature_list.json`
-- `common/agent-progress.txt` → `agent-progress.txt`
-- `common/.env.example` → `.env.example`
+#### 1.3 目录结构扫描
 
-### Step 4：替换基本占位符
+运行 `find . -type d -not -path '*/node_modules/*' -not -path '*/.git/*' -not -path '*/dist/*' -not -path '*/__pycache__/*' -maxdepth 4` 或等效命令，获取项目的真实目录树。
 
-如果用户提供了项目名或描述：
+重点关注 src/ 或项目根目录下的**顶层模块划分**：
+- 是典型分层吗？（types / services / controllers / routes）
+- 还是功能模块？（daemon / analyzer / generator / commands）
+- 还是领域驱动？（user / order / payment）
+- 还是 monorepo？（packages/ / apps/）
+
+#### 1.4 实体和类型扫描
+
+根据语言扫描代码中的类型定义：
+
+```
+TypeScript: grep -rn 'export (interface|type|class) ' src/
+Python: grep -rn 'class .*(BaseModel|Model):' src/ 或 grep -rn '@dataclass' src/
+Go: grep -rn 'type .* struct' .
+Rust: grep -rn 'pub struct\|pub enum' src/
+Java/Kotlin: grep -rn 'public class\|data class' src/
+Swift: grep -rn 'struct\|class\|enum' Sources/
+Dart: grep -rn 'class .* {' lib/
+```
+
+记录每个实体的名称、关键字段、所在文件。
+
+#### 1.5 现有配置检测
+
+检查项目是否已有：
+- CLAUDE.md / AGENTS.md（不覆盖，或问用户合并策略）
+- .github/workflows/（已有 CI 就不生成新的，或合并）
+- .pre-commit-config.yaml（同上）
+- docs/ 目录
+
+### Phase 2：确认生成方案
+
+把扫描结果汇总给用户确认：
+
+```
+检测到的技术栈：TypeScript + Next.js
+包管理器：pnpm
+Linter：Biome
+Test runner：Vitest
+目录结构类型：功能模块（daemon / analyzer / generator / commands）
+检测到的实体：RawObservation, Observation, AnalysisResult, Config
+
+将生成：
+- CLAUDE.md — Claude 工作指令
+- AGENTS.md — Codex/Cursor 工作指令
+- docs/architecture.md — 基于实际目录结构
+- docs/golden-principles.md — 8 条黄金原则（使用 Biome 执行）
+- docs/domain-model.md — 基于扫描到的实体
+- docs/onboarding.md — 基于实际命令
+- scripts/layer-check.sh — 基于实际模块依赖
+- scripts/init.sh — 基于实际工具链
+- .github/workflows/ci.yml — 基于实际命令
+- .pre-commit-config.yaml — 基于实际工具
+- feature_list.json — 空模版
+- agent-progress.txt — 空日志
+
+确认？
+```
+
+用户确认后才生成。
+
+### Phase 3：生成文件
+
+以下是每个文件的生成规则。所有内容都基于 Phase 1 的扫描结果，**不从 GitHub 拉预置模版**。
+
+#### 3.1 CLAUDE.md / AGENTS.md
+
+从 GitHub 仓库拉取对应栈的模版作为**骨架**，然后用扫描结果替换所有动态内容：
+
+```
+拉取：https://raw.githubusercontent.com/ppop123/harness/main/stacks/$STACK/claude/CLAUDE.md
+拉取：https://raw.githubusercontent.com/ppop123/harness/main/stacks/$STACK/codex/AGENTS.md
+```
+
+必须替换的内容：
 - `[PROJECT_NAME]` → 项目名
 - `[ONE_LINE_DESCRIPTION]` → 描述
-- `[OWNER]` → 从 git config 或上下文获取
-- `[DATE]` → 今天的日期
+- `[OWNER]` → 从 git config user.name / user.email 获取
+- `[DATE]` → 今天日期
+- 分层引用 → 替换为项目实际模块结构
+- 命令引用 → 替换为项目实际命令（如 `pnpm lint` 而不是 `npm run lint`）
+- `<!-- harness-init 适配 -->` 注释处 → 替换为真实内容
 
-### Step 5：项目适配（必须执行，不可跳过）
+#### 3.2 docs/architecture.md
 
-这是最关键的一步。扫描当前项目的实际情况，把模版内容替换成真实信息。
+**完全根据扫描结果生成**，不用模版：
 
-#### 5.1 检测包管理器和工具链
+```markdown
+# 架构文档 — [项目名]
 
-扫描当前目录，确定实际使用的工具：
+## 模块结构
+
+[从 1.3 的扫描结果生成目录树]
+
+## 模块职责
+
+| 模块 | 职责 | 依赖 |
+|------|------|------|
+[从代码的 import/require 关系推断每个模块的职责和依赖方向]
+
+## 依赖方向
+
+[画出实际的依赖方向，不要硬套 types → services → controllers]
+
+## 变更记录
+
+| 日期 | 变更 | 原因 |
+|------|------|------|
+| [TODAY] | 初始架构（由 harness-init 从代码扫描生成） | 项目装载 Harness |
+```
+
+#### 3.3 docs/golden-principles.md
+
+从 GitHub 拉取对应栈的黄金原则模版，但把**执行工具替换为项目实际使用的**：
 
 ```
-包管理器：查找 pnpm-lock.yaml / yarn.lock / package-lock.json / Cargo.lock / go.sum / Pipfile.lock / poetry.lock / pubspec.lock
-Linter：查找 biome.json / .eslintrc* / .ruff.toml / .golangci.yml / clippy.toml / .swiftlint.yml / detekt.yml
-Formatter：查找 biome.json / .prettierrc* / rustfmt.toml
-Test runner：查找 vitest.config* / jest.config* / pytest.ini / Cargo.toml [dev-dependencies]
-Type checker：查找 tsconfig.json (strict) / mypy.ini / pyproject.toml [tool.mypy]
+拉取：https://raw.githubusercontent.com/ppop123/harness/main/stacks/$STACK/docs/golden-principles.md
 ```
 
-然后替换以下文件中的命令：
-- `scripts/init.sh` — 替换安装命令（npm install → pnpm install）、lint 命令（eslint → biome check）、test 命令
-- `.github/workflows/ci.yml` — 替换所有构建/lint/test 步骤
-- `.pre-commit-config.yaml` — 替换 hook 入口命令
-- `CLAUDE.md` / `AGENTS.md` — 替换"完成标准"和"常用命令"中的命令
-- `docs/onboarding.md` — 替换环境搭建和命令表
+替换：
+- linter 名称（ESLint → Biome）
+- type checker（tsc → biome check）
+- 验证库（zod → 项目实际使用的）
+- 环境变量工具（@t3-oss/env-nextjs → 项目实际使用的）
 
-#### 5.2 扫描实际目录结构
+#### 3.4 scripts/layer-check.sh
 
-运行 `ls` 或 `find` 扫描 src/ 或项目根目录的**实际顶层目录**。
+**完全根据扫描结果生成**：
 
-然后：
-- `docs/architecture.md` — 用实际目录结构替换模版中的示例目录树和分层定义
-- `scripts/layer-check.sh` — 用实际目录名替换检查路径。如果项目结构不是典型分层（如 CLI 工具、monorepo），要重写规则或明确标注"此项目不适用标准分层检查"
-- `CLAUDE.md` / `AGENTS.md` — 更新分层引用
+- 如果项目是典型分层（types/services/controllers），生成标准分层检查
+- 如果项目是功能模块（daemon/analyzer/generator），生成**模块边界检查**——每个模块不应该直接 import 另一个模块的内部文件
+- 如果无法确定合理的依赖规则，生成一个带注释的骨架，标注 `# TODO: 根据项目实际情况补充依赖规则`
+- 不允许生成一个"什么都不检查"的空壳脚本——至少检查一些基本规则
 
-**特别注意**：如果项目不是典型的 API 分层结构（比如 CLI 工具、桌面应用、库），不要硬套 `types → repositories → services → controllers` 这套模型。改为描述项目的实际模块关系。
+#### 3.5 scripts/init.sh
 
-#### 5.3 扫描已有类型定义和实体
-
-在 src/ 中查找：
-- TypeScript：`interface` / `type` / `class` 定义
-- Python：Pydantic `BaseModel` / dataclass / Django Model
-- Go：`type ... struct`
-- Rust：`struct` / `enum`
-- 其他语言类推
-
-然后：
-- `docs/domain-model.md` — 用扫描到的真实实体替换模版中的 `[Entity1 名称]` 占位符。至少填入实体名、关键字段、关联关系。如果能从代码推断业务含义就写上，推断不了就留 `[待补充]`
-- 删除模版中明显不适用的示例内容（如"User registration"）
-
-#### 5.4 清空示例占位内容
-
-- `feature_list.json` — 删除 "User registration" 示例，只保留结构和一条空模版
-- `.env.example` — 删除 `DATABASE_URL=postgresql://` 等示例，根据项目实际依赖填入（查 .env / docker-compose.yml / 配置文件）。没有就留空文件加注释
-
-#### 5.5 验证适配结果
-
-适配完成后，跑一遍基本验证：
+**完全根据扫描结果生成**，所有命令必须是项目里真实可运行的：
 
 ```bash
-bash scripts/init.sh        # 必须能跑通，不能报 command not found
+#!/usr/bin/env bash
+# init.sh — 环境验证
+
+set -euo pipefail
+
+echo "🔧 验证环境..."
+
+# 工具检查（从 1.2 检测到的工具）
+for cmd in [实际工具列表]; do
+  command -v "$cmd" &>/dev/null || { echo "✗ $cmd not found"; exit 1; }
+done
+
+# 安装依赖（从 1.2 检测到的包管理器）
+[实际安装命令]
+
+# Lint（从 1.2 检测到的 linter）
+[实际 lint 命令]
+
+# 测试（从 1.2 检测到的 test runner）
+[实际 test 命令]
+
+echo "✅ 环境验证通过"
+```
+
+#### 3.6 .github/workflows/ci.yml
+
+同理，所有步骤使用实际命令。如果项目已有 CI 配置，问用户是合并还是跳过。
+
+#### 3.7 .pre-commit-config.yaml
+
+同理。如果项目已有，问用户。
+
+#### 3.8 docs/domain-model.md
+
+基于 1.4 扫描到的实体生成：
+
+```markdown
+# 业务领域模型
+
+## 核心实体
+
+### [EntityName]
+描述: [从代码注释或命名推断，推断不了写 [待补充]]
+关键字段:
+  - [field1]: [type]
+  - [field2]: [type]
+所在文件: [file path]
+关联实体: [从 import 关系推断]
+```
+
+没扫描到的部分标注 `[待补充]`，不要编造。
+
+#### 3.9 docs/onboarding.md
+
+基于实际命令生成，常用命令表必须能直接复制执行。
+
+#### 3.10 其他文件
+
+以下文件从 GitHub 拉取即可，不需要动态生成：
+
+```
+common/docs/tech-decisions/000-template.md → docs/tech-decisions/000-template.md
+common/scripts/audit-prompt.md → scripts/audit-prompt.md
+common/scripts/doc-gardening-prompt.md → scripts/doc-gardening-prompt.md
+common/scripts/new-feature-prompt.md → scripts/new-feature-prompt.md
+```
+
+以下文件生成空模版：
+
+```
+feature_list.json — 只保留结构，features 数组为空
+agent-progress.txt — 只保留头部说明
+.env.example — 从项目已有的 .env / .env.local / docker-compose.yml 推断需要的变量，没有就留空
+```
+
+### Phase 4：验证
+
+生成完所有文件后，必须验证：
+
+```bash
+bash scripts/init.sh         # 必须跑通
 bash scripts/layer-check.sh  # 必须检查真实目录，不能空跑通过
 ```
 
-如果跑不通，继续修直到通过。
+如果失败，修正后重新验证，直到通过。
 
-### Step 6：输出摘要
+### Phase 5：输出摘要
 
-展示：
-1. 写入了哪些文件
-2. 做了哪些适配（检测到什么工具、替换了什么命令、扫描到哪些实体）
-3. 下一步行动：
-   - 补充 `docs/domain-model.md` 中标记 `[待补充]` 的部分
-   - 确认 `docs/architecture.md` 的分层是否准确
-   - 开始开发时先读 CLAUDE.md 或 AGENTS.md
+```
+✅ Harness 已装载
+
+生成了 N 个文件：
+- CLAUDE.md / AGENTS.md
+- docs/ (architecture, golden-principles, domain-model, onboarding)
+- scripts/ (init.sh, layer-check.sh, audit/doc-gardening/new-feature prompts)
+- CI + pre-commit
+- feature_list.json + agent-progress.txt
+
+检测结果：
+- 技术栈：[xxx]
+- 包管理器：[xxx]
+- Linter：[xxx]
+- 模块结构：[xxx]
+- 扫描到 N 个实体
+
+下一步：
+1. 检查 docs/architecture.md 的模块描述是否准确
+2. 补充 docs/domain-model.md 中标记 [待补充] 的部分
+3. 开始开发时先读 CLAUDE.md
+```
