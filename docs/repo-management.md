@@ -96,7 +96,9 @@
 
 - 统一安装方式：
   ```bash
-  claude skill install https://github.com/ppop123/harness/releases/latest/download/harness-init.skill
+  mkdir -p ~/.claude/skills/harness-init
+  curl -sL https://github.com/ppop123/harness/releases/latest/download/harness-init.skill -o /tmp/harness-init.skill
+  unzip -o /tmp/harness-init.skill -d ~/.claude/skills/
   ```
 - 安装后在项目目录中输入 `/harness-init`，交互式选择技术栈和 AI 工具版本
 - Skill 从 GitHub 按需拉取对应 stack 文件，同时支持 CLAUDE.md 和 AGENTS.md

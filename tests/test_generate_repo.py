@@ -121,7 +121,7 @@ class GenerateRepoContractTests(unittest.TestCase):
         self.assertTrue(hasattr(gen, "gen_root_readme"))
         readme = gen.gen_root_readme()
 
-        self.assertIn("claude skill install", readme)
+        self.assertIn("unzip", readme)
         self.assertIn("harness-init.skill", readme)
         self.assertIn("/harness-init", readme)
         self.assertNotIn("$skill-installer", readme)

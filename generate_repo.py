@@ -2181,12 +2181,12 @@ harness/
 ## 安装
 
 ```bash
-claude skill install https://github.com/ppop123/harness/releases/latest/download/harness-init.skill
+mkdir -p ~/.claude/skills/harness-init
+curl -sL https://github.com/ppop123/harness/releases/latest/download/harness-init.skill -o /tmp/harness-init.skill
+unzip -o /tmp/harness-init.skill -d ~/.claude/skills/
 ```
 
-安装后在任何新项目目录中输入 `/harness-init`，交互式选择技术栈和 AI 工具（Claude / Codex / 都要），Skill 自动从 GitHub 拉取对应模版到当前目录。
-
-> Codex 用户同样通过此方式安装——Skill 会同时生成 CLAUDE.md 和 AGENTS.md。
+安装后在任何新项目目录中输入 `/harness-init`，交互式选择技术栈和 AI 工具（Claude / Codex / 都要），Skill 自动从 GitHub 拉取对应模版。
 
 ## Claude vs Codex：区别在哪？
 
