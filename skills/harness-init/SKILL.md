@@ -103,24 +103,34 @@ Dart: grep -rn 'class .* {' lib/
 
 ## A3：动态生成文件
 
-所有文件基于扫描结果生成。
+所有文件基于扫描结果生成。**生成完每个文件后自检：文件中是否还残留模版占位内容？有就立刻修。**
 
 ### CLAUDE.md / AGENTS.md
 
-从 GitHub 拉取对应栈的模版骨架，替换所有动态内容：
-- `[PROJECT_NAME]` / `[OWNER]` / `[DATE]` → 真实值
-- 分层引用 → 项目实际模块结构
-- 命令引用 → 项目实际命令
-- `<!-- harness-init 适配 -->` 注释处 → 真实内容
+从 GitHub 拉取对应栈的模版骨架，然后**逐行检查并替换所有动态内容**：
 
 ```
 https://raw.githubusercontent.com/ppop123/harness/main/stacks/$STACK/claude/CLAUDE.md
 https://raw.githubusercontent.com/ppop123/harness/main/stacks/$STACK/codex/AGENTS.md
 ```
 
+必须替换：
+- `[PROJECT_NAME]` / `[OWNER]` / `[DATE]` → 真实值
+- 分层引用（如 `Types → Config → Repositories → Services → Controllers`） → 项目实际模块结构
+- 命令引用（如 `npm run lint`、`npx vitest run`） → 项目实际命令（如 `pnpm lint`、`pnpm test`）
+- `<!-- harness-init 适配 -->` 注释处 → 真实内容
+- 实体描述 → 从扫描结果填入，不要留模版中的示例实体
+
+**禁止**：生成的文件中不允许出现 `[PROJECT_NAME]`、`[OWNER]`、`[ONE_LINE_DESCRIPTION]`、`[DATE]`、`<!-- harness-init` 等未替换的占位符。生成后 grep 检查，有就修。
+
+**禁止**：生成的文件中不允许出现乱码（如 `M-oM-?M-=` 或 `���`）。生成后检查编码，有乱码就重写该行。
+
 ### docs/architecture.md
 
-**完全根据扫描结果生成**——用真实目录树、真实模块职责、真实依赖方向。不硬套 types→services→controllers。
+**完全根据扫描结果生成**——用真实目录树、真实模块职责、真实依赖方向。
+
+**禁止**：不允许出现扫描中不存在的目录名（如项目没有 `repositories/` 就不能写 `repositories/`）。
+**禁止**：不允许描述与代码实现不一致的通信方式（如代码用 HTTP POST，文档不能写"通过 WebSocket 发送"）。
 
 ### docs/golden-principles.md
 
@@ -130,12 +140,25 @@ https://raw.githubusercontent.com/ppop123/harness/main/stacks/$STACK/codex/AGENT
 
 **根据扫描到的目录结构生成**：
 - 典型分层 → 标准分层检查
-- 功能模块 → 模块边界检查
+- 功能模块 → 模块边界检查（每个模块不应直接 import 另一个模块的内部实现）
 - 无法确定 → 带 TODO 注释的骨架，但至少检查基本规则
 
 ### scripts/init.sh
 
 **根据扫描到的工具链生成**，所有命令必须能在当前项目直接跑通。
+
+**关键**：必须兼容非交互环境（CI、Codex 子进程等）。规则：
+- 安装命令加 `--frozen-lockfile`（pnpm）或 `--ci`（npm）或等效 flag，避免交互提示
+- 如果检测到 `CI` 环境变量，跳过可能触发交互的步骤
+- 具体写法：
+
+```bash
+if [[ -n "${CI:-}" ]]; then
+  pnpm install --frozen-lockfile
+else
+  pnpm install
+fi
+```
 
 ### CI / pre-commit
 
@@ -143,13 +166,43 @@ https://raw.githubusercontent.com/ppop123/harness/main/stacks/$STACK/codex/AGENT
 
 ### docs/domain-model.md
 
-**基于扫描到的实体生成**，包含实体名、字段、所在文件、关联关系。推断不了的标注 `[待补充]`。
+**基于 A1 实体扫描结果生成**。必须包含：
+- 每个扫描到的实体名、关键字段（从代码中读取真实字段名和类型）、所在文件路径
+- 实体间的关联关系（从 import 关系推断）
+- 推断不了的写 `[待补充]`
+
+**禁止**：不允许出现扫描中不存在的实体（如代码中没有 User 就不能写 User）。
+**禁止**：不允许描述与代码不一致的字段（如代码字段是 `path`，文档不能写 `url`）。
 
 ### docs/onboarding.md
 
 基于实际命令生成，命令表必须能直接复制执行。
 
-### 静态文件（从 GitHub 拉取）
+### feature_list.json
+
+**禁止**：不允许保留任何示例内容（"User registration"、"POST /api/register" 等）。
+正确做法：features 数组为空 `[]`，只保留结构。
+
+```json
+{
+  "_comment": "功能追踪。每个 session 结束后更新。",
+  "project": "[实际项目名]",
+  "last_updated": "[今天日期]",
+  "features": [],
+  "status_values": ["not_started", "in_progress", "blocked", "testing", "done"]
+}
+```
+
+### .env.example
+
+**禁止**：不允许保留模版中的假变量（DATABASE_URL=postgresql://...、SECRET_KEY=... 等）。
+正确做法：从项目中的 .env / .env.local / docker-compose.yml / 代码中的 process.env 引用推断实际需要的变量。没有就留空文件加注释 `# 暂无环境变量`。
+
+### agent-progress.txt
+
+只保留头部说明格式，不保留任何示例 session 记录。
+
+### 静态文件（从 GitHub 拉取，不需适配）
 
 ```
 common/docs/tech-decisions/000-template.md → docs/tech-decisions/000-template.md
@@ -158,24 +211,28 @@ common/scripts/doc-gardening-prompt.md → scripts/doc-gardening-prompt.md
 common/scripts/new-feature-prompt.md → scripts/new-feature-prompt.md
 ```
 
-### 空模版
-
-- `feature_list.json` — features 数组为空
-- `agent-progress.txt` — 只有头部说明
-- `.env.example` — 从 .env/.env.local/docker-compose.yml 推断，没有就留空
-
 ## A4：验证
 
+### 自动验证
+
 ```bash
-bash scripts/init.sh         # 必须跑通
-bash scripts/layer-check.sh  # 必须检查真实目录，不能空跑
+CI=true bash scripts/init.sh   # 必须跑通（含非交互模式）
+bash scripts/layer-check.sh    # 必须检查真实目录，不能空跑
 ```
 
-失败就修，直到通过。
+### 内容验证（逐条检查）
+
+1. grep 所有生成的文件，确认无残留占位符：`[PROJECT_NAME]`、`[OWNER]`、`[DATE]`、`[Entity1`、`[YOUR FEATURE]`、`[待补充]` 以外的方括号占位
+2. grep 所有生成的文件，确认无乱码：`���`、`M-o`
+3. 检查 feature_list.json 的 features 数组是否为空
+4. 检查 .env.example 是否已清除模版内容
+5. 检查 docs/domain-model.md 中的实体是否与 src/ 中的类型定义一致
+
+任何验证失败就修，直到全部通过。
 
 ## A5：输出摘要
 
-展示生成的文件列表、检测结果、下一步行动。
+展示生成的文件列表、检测结果、下一步行动。明确列出哪些文件标注了 `[待补充]`，提醒用户补完。
 
 ---
 
