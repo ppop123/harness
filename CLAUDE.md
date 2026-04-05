@@ -5,7 +5,7 @@
 
 ## 项目定位
 
-- 这是一个多技术栈 Harness Engineering 模版仓库。
+- 这是一个多技术栈 Harness Engineering 模板仓库。
 - 关键目标是让生成出来的项目对 AI 更可读、更可验证、更不容易偏航。
 - `generate_repo.py` 负责生成 `stacks/`、根 README 和 `manifest.json`。
 

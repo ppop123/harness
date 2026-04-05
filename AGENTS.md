@@ -5,7 +5,7 @@
 
 ## 项目定位
 
-- 这是一个 Harness Engineering 模版仓库，核心资产是约束系统而不是示例代码。
+- 这是一个 Harness Engineering 模板仓库，核心资产是约束系统而不是示例代码。
 - `generate_repo.py` 是生成器和主要事实来源。
 - `stacks/` 下是生成产物，不要手改。
 
@@ -38,7 +38,7 @@ python3 -m unittest discover -s tests -q
 
 - `AGENTS.md` 面向跨工具通用入口，强调统一规则和可执行验证。
 - `CLAUDE.md` 面向 Claude / Claude Code，允许更强的对话式节奏，但不能和这里的事实冲突。
-- 两者的详细差异说明统一写在 `docs/repo-management.md`，避免双份长文档漂移。
+- 两者的详细差异统一写在 `docs/repo-management.md`，避免双份文档漂移。
 
 ## 完成标准
 

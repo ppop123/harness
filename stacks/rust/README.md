@@ -1,4 +1,4 @@
-# Rust — Harness Engineering 模版
+# Rust — Harness Engineering 模板
 
 **分类**：Rust 高性能后端 / 系统
 **语言**：Rust
@@ -14,8 +14,8 @@
 | `config/pre-commit-config.yaml` | Pre-commit hooks 配置 |
 | `scripts/layer-check.sh` | 依赖层级结构测试（语言感知导入检查） |
 | `scripts/init.sh` | 环境验证 + baseline 测试脚本 |
-| `ci/ci.yml` | GitHub Actions CI 模版 |
-| `docs/` | 架构、原则、领域模型（使用 common/ 的模版）|
+| `ci/ci.yml` | GitHub Actions CI 模板 |
+| `docs/` | 架构、原则、领域模型（使用 common/ 的模板）|
 
 ## 使用方法
 

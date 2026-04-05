@@ -1,7 +1,7 @@
 # Harness Engineering Templates
 
 > 基于 [OpenAI Harness Engineering](https://openai.com/index/harness-engineering/) 思想，
-> 为 **13 种主流技术栈** 提供标准化的 AI-first 项目模版。
+> 为 **13 种主流技术栈** 提供标准化的 AI-first 项目模板。
 > 每个技术栈同时支持 **Claude（CLAUDE.md）** 和 **Codex（AGENTS.md）** 双版本。
 
 ---
@@ -41,17 +41,17 @@
 ```
 harness/
 ├── common/              # 所有项目通用的文档和脚本
-│   ├── docs/            # 领域模型、ADR 模版
+│   ├── docs/            # 领域模型、ADR 模板
 │   ├── scripts/         # AI 审计/维护 prompt
-│   ├── feature_list.json    # 功能追踪模版（JSON 防误改）
-│   └── agent-progress.txt      # 跨 session 进度日志模版
+│   ├── feature_list.json    # 功能追踪模板（JSON 防误改）
+│   └── agent-progress.txt      # 跨 session 进度日志模板
 ├── stacks/              # 按技术栈分类
 │   └── <stack-name>/
 │       ├── claude/      # CLAUDE.md（Claude 专属）
 │       ├── codex/       # AGENTS.md（Codex / 通用）
 │       ├── config/      # Lint + pre-commit 配置
 │       ├── scripts/     # layer-check.sh + init.sh（机械化执行）
-│       ├── ci/          # GitHub Actions CI 模版
+│       ├── ci/          # GitHub Actions CI 模板
 │       └── docs/        # 架构、原则（技术栈专属）
 └── combos/              # 常用前后端组合
 ```
@@ -64,7 +64,7 @@ curl -sL https://github.com/ppop123/harness/releases/latest/download/harness-ini
 unzip -o /tmp/harness-init.skill -d ~/.claude/skills/
 ```
 
-安装后在任何新项目目录中输入 `/harness-init`，交互式选择技术栈和 AI 工具（Claude / Codex / 都要），Skill 自动从 GitHub 拉取对应模版。
+安装后在任何新项目目录中输入 `/harness-init`，交互式选择技术栈和 AI 工具（Claude / Codex / 都要），Skill 自动从 GitHub 拉取对应模板。
 
 ## Claude vs Codex：区别在哪？
 

@@ -1,7 +1,7 @@
 # ADR-[NUMBER]: [技术决策标题]
 
 > ADR = Architecture Decision Record（架构决策记录）
-> 每次做重要的技术选型，复制本模版，填写后放入 `docs/tech-decisions/` 目录。
+> 每次做重要的技术选型，复制本模板，填写后放入 `docs/tech-decisions/` 目录。
 
 ---
 

@@ -2026,7 +2026,7 @@ def harness_load_prompt(stack_id: str) -> str:
 
 
 def gen_readme(stack_id: str, stack: dict) -> str:
-    return f"""# {stack['name']} — Harness Engineering 模版
+    return f"""# {stack['name']} — Harness Engineering 模板
 
 **分类**：{stack['label']}
 **语言**：{stack['lang']}
@@ -2042,8 +2042,8 @@ def gen_readme(stack_id: str, stack: dict) -> str:
 | `config/pre-commit-config.yaml` | Pre-commit hooks 配置 |
 | `scripts/layer-check.sh` | 依赖层级结构测试（语言感知导入检查） |
 | `scripts/init.sh` | 环境验证 + baseline 测试脚本 |
-| `ci/ci.yml` | GitHub Actions CI 模版 |
-| `docs/` | 架构、原则、领域模型（使用 common/ 的模版）|
+| `ci/ci.yml` | GitHub Actions CI 模板 |
+| `docs/` | 架构、原则、领域模型（使用 common/ 的模板）|
 
 ## 使用方法
 
@@ -2073,20 +2073,20 @@ def gen_readme(stack_id: str, stack: dict) -> str:
 
 
 def gen_combo_readme(combo_id: str, combo: dict) -> str:
-    return f"""# {combo['name']} — 组合模版
+    return f"""# {combo['name']} — 组合模板
 
 {combo['description']}
 
 ## 组成
 
-| 部分 | 模版 |
+| 部分 | 模板 |
 |------|------|
 | 前端/客户端 | `stacks/{combo['frontend']}/` |
 | 后端 | `stacks/{combo['backend']}/` |
 
 ## 使用方法
 
-1. 分别从对应模版复制文件到前后端项目
+1. 分别从对应模板复制文件到前后端项目
 2. 前后端共用 `common/docs/domain-model.md`（统一业务语言）
 3. 在根目录创建一个 monorepo 级别的 `AGENTS.md` 或 `CLAUDE.md`，指向两边
 
@@ -2118,7 +2118,7 @@ def gen_root_readme() -> str:
     return f"""# Harness Engineering Templates
 
 > 基于 [OpenAI Harness Engineering](https://openai.com/index/harness-engineering/) 思想，
-> 为 **13 种主流技术栈** 提供标准化的 AI-first 项目模版。
+> 为 **13 种主流技术栈** 提供标准化的 AI-first 项目模板。
 > 每个技术栈同时支持 **Claude（CLAUDE.md）** 和 **Codex（AGENTS.md）** 双版本。
 
 ---
@@ -2140,17 +2140,17 @@ def gen_root_readme() -> str:
 ```
 harness/
 ├── common/              # 所有项目通用的文档和脚本
-│   ├── docs/            # 领域模型、ADR 模版
+│   ├── docs/            # 领域模型、ADR 模板
 │   ├── scripts/         # AI 审计/维护 prompt
-│   ├── feature_list.json    # 功能追踪模版（JSON 防误改）
-│   └── {PROGRESS_FILE}      # 跨 session 进度日志模版
+│   ├── feature_list.json    # 功能追踪模板（JSON 防误改）
+│   └── {PROGRESS_FILE}      # 跨 session 进度日志模板
 ├── stacks/              # 按技术栈分类
 │   └── <stack-name>/
 │       ├── claude/      # CLAUDE.md（Claude 专属）
 │       ├── codex/       # AGENTS.md（Codex / 通用）
 │       ├── config/      # Lint + pre-commit 配置
 │       ├── scripts/     # layer-check.sh + init.sh（机械化执行）
-│       ├── ci/          # GitHub Actions CI 模版
+│       ├── ci/          # GitHub Actions CI 模板
 │       └── docs/        # 架构、原则（技术栈专属）
 └── combos/              # 常用前后端组合
 ```
@@ -2163,7 +2163,7 @@ curl -sL https://github.com/ppop123/harness/releases/latest/download/harness-ini
 unzip -o /tmp/harness-init.skill -d ~/.claude/skills/
 ```
 
-安装后在任何新项目目录中输入 `/harness-init`，交互式选择技术栈和 AI 工具（Claude / Codex / 都要），Skill 自动从 GitHub 拉取对应模版。
+安装后在任何新项目目录中输入 `/harness-init`，交互式选择技术栈和 AI 工具（Claude / Codex / 都要），Skill 自动从 GitHub 拉取对应模板。
 
 ## Claude vs Codex：区别在哪？
 

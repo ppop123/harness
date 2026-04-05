@@ -49,7 +49,7 @@ Package.swift → Swift
 pubspec.yaml → Dart / Flutter
 ```
 
-检测不到或有多个时问用户。
+检测不到或有多个时，问用户确认。
 
 ### 工具链检测
 
@@ -85,7 +85,7 @@ Dart: grep -rn 'class .* {' lib/
 
 ### 现有配置检测
 
-检查是否已有 CLAUDE.md / AGENTS.md / .github/workflows / .pre-commit-config.yaml / docs/，已有的不覆盖或问用户合并策略。
+检查是否已有 CLAUDE.md / AGENTS.md / .github/workflows / .pre-commit-config.yaml / docs/，已有的不覆盖，问用户是合并还是跳过。
 
 ## A2：确认生成方案
 
@@ -103,11 +103,11 @@ Dart: grep -rn 'class .* {' lib/
 
 ## A3：动态生成文件
 
-所有文件基于扫描结果生成。**生成完每个文件后自检：文件中是否还残留模版占位内容？有就立刻修。**
+所有文件基于扫描结果生成。**生成完每个文件后自检：文件中是否还残留模板占位内容？有就立刻修。**
 
 ### CLAUDE.md / AGENTS.md
 
-从 GitHub 拉取对应栈的模版骨架，然后**逐行检查并替换所有动态内容**：
+从 GitHub 拉取对应栈的模板骨架，然后**逐行检查并替换所有动态内容**：
 
 ```
 https://raw.githubusercontent.com/ppop123/harness/main/stacks/$STACK/claude/CLAUDE.md
@@ -119,7 +119,7 @@ https://raw.githubusercontent.com/ppop123/harness/main/stacks/$STACK/codex/AGENT
 - 分层引用（如 `Types → Config → Repositories → Services → Controllers`） → 项目实际模块结构
 - 命令引用（如 `npm run lint`、`npx vitest run`） → 项目实际命令（如 `pnpm lint`、`pnpm test`）
 - `<!-- harness-init 适配 -->` 注释处 → 真实内容
-- 实体描述 → 从扫描结果填入，不要留模版中的示例实体
+- 实体描述 → 从扫描结果填入，不要留模板中的示例实体
 
 **禁止**：生成的文件中不允许出现 `[PROJECT_NAME]`、`[OWNER]`、`[ONE_LINE_DESCRIPTION]`、`[DATE]`、`<!-- harness-init` 等未替换的占位符。生成后 grep 检查，有就修。
 
@@ -134,7 +134,7 @@ https://raw.githubusercontent.com/ppop123/harness/main/stacks/$STACK/codex/AGENT
 
 ### docs/golden-principles.md
 
-从 GitHub 拉取对应栈的黄金原则模版，把执行工具替换为项目实际使用的（ESLint→Biome 等）。
+从 GitHub 拉取对应栈的黄金原则模板，把执行工具替换为项目实际使用的（ESLint→Biome 等）。
 
 ### scripts/layer-check.sh
 
@@ -147,7 +147,7 @@ https://raw.githubusercontent.com/ppop123/harness/main/stacks/$STACK/codex/AGENT
 
 **根据扫描到的工具链生成**，所有命令必须能在当前项目直接跑通。
 
-**关键**：必须兼容非交互环境（CI、Codex 子进程等）。规则：
+**必须兼容非交互环境**（CI、自动化子进程等）。规则：
 - 安装命令加 `--frozen-lockfile`（pnpm）或 `--ci`（npm）或等效 flag，避免交互提示
 - 如果检测到 `CI` 环境变量，跳过可能触发交互的步骤
 - 具体写法：
@@ -162,7 +162,7 @@ fi
 
 ### CI / pre-commit
 
-同理，用实际命令。已有配置时问用户合并还是跳过。
+同理，用实际命令。已有配置时，问用户是合并还是跳过。
 
 ### docs/domain-model.md
 
@@ -195,7 +195,7 @@ fi
 
 ### .env.example
 
-**禁止**：不允许保留模版中的假变量（DATABASE_URL=postgresql://...、SECRET_KEY=... 等）。
+**禁止**：不允许保留模板中的假变量（DATABASE_URL=postgresql://...、SECRET_KEY=... 等）。
 正确做法：从项目中的 .env / .env.local / docker-compose.yml / 代码中的 process.env 引用推断实际需要的变量。没有就留空文件加注释 `# 暂无环境变量`。
 
 ### agent-progress.txt
@@ -225,7 +225,7 @@ bash scripts/layer-check.sh    # 必须检查真实目录，不能空跑
 1. grep 所有生成的文件，确认无残留占位符：`[PROJECT_NAME]`、`[OWNER]`、`[DATE]`、`[Entity1`、`[YOUR FEATURE]`、`[待补充]` 以外的方括号占位
 2. grep 所有生成的文件，确认无乱码：`���`、`M-o`
 3. 检查 feature_list.json 的 features 数组是否为空
-4. 检查 .env.example 是否已清除模版内容
+4. 检查 .env.example 是否已清除模板内容
 5. 检查 docs/domain-model.md 中的实体是否与 src/ 中的类型定义一致
 
 任何验证失败就修，直到全部通过。
@@ -289,7 +289,7 @@ mkdir -p docs docs/tech-decisions scripts .github/workflows
 
 ## B3：生成 Harness 文件
 
-以下文件全部从 GitHub 拉取对应栈的模版，然后替换占位符：
+以下文件全部从 GitHub 拉取对应栈的模板，然后替换占位符：
 
 ### 从 GitHub 拉取并替换占位符的文件
 
@@ -319,14 +319,14 @@ common/scripts/new-feature-prompt.md → scripts/new-feature-prompt.md
 
 ### 根据用户偏好调整的文件
 
-如果用户选的包管理器或 linter 和模版默认不同，替换以下文件中的命令：
+如果用户选的包管理器或 linter 和模板默认不同，替换以下文件中的命令：
 - `scripts/init.sh` — 安装命令和 lint 命令
 - `.github/workflows/ci.yml` — 构建步骤
 - `.pre-commit-config.yaml` — hook 命令
 - `CLAUDE.md` / `AGENTS.md` — 完成标准中的命令
 - `docs/onboarding.md` — 常用命令表
 
-### 生成空模版
+### 生成空模板
 
 - `feature_list.json` — features 数组为空
 - `agent-progress.txt` — 只有头部说明
