@@ -36,7 +36,7 @@ cat feature_list.json       # 确认当前任务
 
 ## 核心规则（不可违反）
 
-1. **依赖方向单向流动** — `Config → Data → Models → Pipelines → Evaluation → API/UI`，禁止反向
+1. **依赖方向单向流动** — `Config → Data → Models → Pipelines → Evaluation → API/UI`，禁止反向  <!-- harness-init 适配：替换为项目实际分层 -->
 2. **边界必须验证** — 外部数据用 Pydantic 验证，不猜测结构
 3. **不重复** — 复用 utils/lib，超过 2 处重复必须提取
 4. **类型安全** — 严格使用 mypy (moderate)

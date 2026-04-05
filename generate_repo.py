@@ -920,7 +920,7 @@ def gen_claude_md(stack: dict) -> str:
 
 ### 代码生产
 - 写**最小可运行**的变更，不顺手"优化"无关代码
-- 按层级顺序实现：{stack['layers']}
+- 按层级顺序实现：{stack['layers']}  <!-- harness-init 适配：替换为项目实际分层 -->
 - 每完成一个子任务，汇报进度再继续
 
 ### 上下文管理
@@ -928,7 +928,7 @@ def gen_claude_md(stack: dict) -> str:
 - 上下文不够时，告诉我优先需要哪些文件
 
 ### 完成标准
-- [ ] `{stack['commands']['check']}` 全部通过
+- [ ] `{stack['commands']['check']}` 全部通过  <!-- harness-init 适配：替换为项目实际命令 -->
 - [ ] `bash scripts/layer-check.sh` 无违规
 - [ ] 新增模块已更新 `docs/domain-model.md`
 - [ ] `feature_list.json` 状态已更新
@@ -990,7 +990,7 @@ cat feature_list.json       # 确认当前任务
 
 ## 核心规则（不可违反）
 
-1. **依赖方向单向流动** — `{stack['layers']}`，禁止反向
+1. **依赖方向单向流动** — `{stack['layers']}`，禁止反向  <!-- harness-init 适配：替换为项目实际分层 -->
 2. **边界必须验证** — 外部数据用 {stack['validation']} 验证，不猜测结构
 3. **不重复** — 复用 utils/lib，超过 2 处重复必须提取
 4. **类型安全** — 严格使用 {stack['type_checker']}
@@ -1608,28 +1608,14 @@ def _install_cmd(stack: dict) -> str:
 def gen_feature_list_json() -> str:
     """Generate feature_list.json template for cross-session progress tracking."""
     return json.dumps({
-        "_comment": "Feature tracking for AI agents. JSON format prevents accidental overwrites. Update status as you implement.",
+        "_comment": "Feature tracking for AI agents. harness-init 适配时会清空示例内容。",
         "project": "[PROJECT_NAME]",
         "last_updated": "[DATE]",
         "features": [
             {
                 "id": "F-001",
-                "name": "Example: User registration",
-                "description": "Users can sign up with email and password",
-                "status": "not_started",
-                "acceptance_criteria": [
-                    "POST /api/register accepts email + password",
-                    "Passwords are hashed with bcrypt",
-                    "Duplicate email returns 409",
-                    "Success returns JWT token"
-                ],
-                "files_touched": [],
-                "notes": ""
-            },
-            {
-                "id": "F-002",
-                "name": "[YOUR FEATURE]",
-                "description": "[WHAT IT DOES]",
+                "name": "[第一个功能]",
+                "description": "[功能描述]",
                 "status": "not_started",
                 "acceptance_criteria": [],
                 "files_touched": [],

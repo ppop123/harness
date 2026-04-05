@@ -40,7 +40,7 @@
 
 ### 代码生产
 - 写**最小可运行**的变更，不顺手"优化"无关代码
-- 按层级顺序实现：Models → Managers → Services → Serializers → Views → URLs
+- 按层级顺序实现：Models → Managers → Services → Serializers → Views → URLs  <!-- harness-init 适配：替换为项目实际分层 -->
 - 每完成一个子任务，汇报进度再继续
 
 ### 上下文管理
@@ -48,7 +48,7 @@
 - 上下文不够时，告诉我优先需要哪些文件
 
 ### 完成标准
-- [ ] `make lint && make test` 全部通过
+- [ ] `make lint && make test` 全部通过  <!-- harness-init 适配：替换为项目实际命令 -->
 - [ ] `bash scripts/layer-check.sh` 无违规
 - [ ] 新增模块已更新 `docs/domain-model.md`
 - [ ] `feature_list.json` 状态已更新

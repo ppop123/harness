@@ -1,26 +1,12 @@
 {
-  "_comment": "Feature tracking for AI agents. JSON format prevents accidental overwrites. Update status as you implement.",
+  "_comment": "Feature tracking for AI agents. harness-init 适配时会清空示例内容。",
   "project": "[PROJECT_NAME]",
   "last_updated": "[DATE]",
   "features": [
     {
       "id": "F-001",
-      "name": "Example: User registration",
-      "description": "Users can sign up with email and password",
-      "status": "not_started",
-      "acceptance_criteria": [
-        "POST /api/register accepts email + password",
-        "Passwords are hashed with bcrypt",
-        "Duplicate email returns 409",
-        "Success returns JWT token"
-      ],
-      "files_touched": [],
-      "notes": ""
-    },
-    {
-      "id": "F-002",
-      "name": "[YOUR FEATURE]",
-      "description": "[WHAT IT DOES]",
+      "name": "[第一个功能]",
+      "description": "[功能描述]",
       "status": "not_started",
       "acceptance_criteria": [],
       "files_touched": [],
