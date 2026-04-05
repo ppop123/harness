@@ -2,28 +2,41 @@
 name: harness-init
 description: |
   为当前项目生成 Harness Engineering 工程结构。
-  先扫描项目再生成，不拉预置模版。输入 /harness-init 开始。
+  已有项目自动扫描生成，新项目交互引导生成。输入 /harness-init 开始。
 ---
 
 # Harness Init
 
 为当前项目生成量身定制的 Harness Engineering 工程结构。
 
-**核心原则：先扫描，再生成。不拉固定模版。**
-
-所有生成的文件必须反映项目的真实情况——真实的包管理器、真实的目录结构、真实的实体、真实的命令。生成出来的 init.sh 必须能直接跑通，layer-check.sh 必须检查真实目录。
+支持两种场景：
+- **已有项目**：扫描代码后动态生成，所有文件反映真实情况
+- **全新项目**：交互引导选择技术栈和偏好，生成标准骨架 + Harness 结构
 
 ---
 
-## 执行流程
+## Step 0：判断项目类型
 
-### Phase 1：扫描项目
+检查当前目录是否有代码文件：
 
-在做任何事之前，先收集项目的完整画像。
+```
+package.json / tsconfig.json / pyproject.toml / setup.py / go.mod /
+Cargo.toml / pom.xml / build.gradle / *.csproj / Package.swift / pubspec.yaml /
+src/ / lib/ / app/ / cmd/
+```
 
-#### 1.1 技术栈检测
+- **找到任何一个** → 走 **路径 A：已有项目（扫描流程）**
+- **全都没有**（空目录或只有 README/.git） → 走 **路径 B：全新项目（引导流程）**
 
-扫描以下文件确定语言和框架：
+---
+
+# 路径 A：已有项目
+
+适用于已经有代码的项目。先扫描，再生成。
+
+## A1：扫描项目
+
+### 技术栈检测
 
 ```
 package.json / tsconfig.json → TypeScript (Next.js / Node / React Native / Expo)
@@ -36,222 +49,107 @@ Package.swift → Swift
 pubspec.yaml → Dart / Flutter
 ```
 
-如果检测不到或有多个，问用户。
+检测不到或有多个时问用户。
 
-#### 1.2 工具链检测
+### 工具链检测
 
 ```
-包管理器：pnpm-lock.yaml / yarn.lock / package-lock.json / Cargo.lock / go.sum / poetry.lock / uv.lock / pubspec.lock
-Linter：biome.json / biome.jsonc / .eslintrc* / eslint.config.* / ruff.toml / pyproject.toml[tool.ruff] / .golangci.yml / clippy.toml / .swiftlint.yml / detekt.yml
-Formatter：biome.json / .prettierrc* / rustfmt.toml / pyproject.toml[tool.ruff.format]
-Test runner：vitest.config* / jest.config* / pytest.ini / pyproject.toml[tool.pytest] / Cargo.toml / go test
+包管理器：pnpm-lock.yaml / yarn.lock / package-lock.json / Cargo.lock / go.sum / poetry.lock / uv.lock
+Linter：biome.json / .eslintrc* / eslint.config.* / ruff.toml / pyproject.toml[tool.ruff] / .golangci.yml / clippy.toml
+Formatter：biome.json / .prettierrc* / rustfmt.toml
+Test runner：vitest.config* / jest.config* / pytest.ini / pyproject.toml[tool.pytest]
 Type checker：tsconfig.json(strict) / mypy.ini / pyproject.toml[tool.mypy]
 ```
 
-读 package.json 的 scripts 字段，确认 dev / lint / test / build 的真实命令。
+读 package.json 的 scripts 字段确认 dev/lint/test/build 的真实命令。
 
-#### 1.3 目录结构扫描
+### 目录结构扫描
 
-运行 `find . -type d -not -path '*/node_modules/*' -not -path '*/.git/*' -not -path '*/dist/*' -not -path '*/__pycache__/*' -maxdepth 4` 或等效命令，获取项目的真实目录树。
+获取项目的真实目录树（排除 node_modules/.git/dist 等），识别顶层模块划分：
+- 典型分层？（types / services / controllers）
+- 功能模块？（daemon / analyzer / commands）
+- 领域驱动？（user / order / payment）
+- monorepo？（packages/ / apps/）
 
-重点关注 src/ 或项目根目录下的**顶层模块划分**：
-- 是典型分层吗？（types / services / controllers / routes）
-- 还是功能模块？（daemon / analyzer / generator / commands）
-- 还是领域驱动？（user / order / payment）
-- 还是 monorepo？（packages/ / apps/）
-
-#### 1.4 实体和类型扫描
-
-根据语言扫描代码中的类型定义：
+### 实体和类型扫描
 
 ```
 TypeScript: grep -rn 'export (interface|type|class) ' src/
-Python: grep -rn 'class .*(BaseModel|Model):' src/ 或 grep -rn '@dataclass' src/
-Go: grep -rn 'type .* struct' .
+Python: grep -rn 'class .*(BaseModel|Model):' src/ 或 @dataclass
+Go: grep -rn 'type .* struct'
 Rust: grep -rn 'pub struct\|pub enum' src/
 Java/Kotlin: grep -rn 'public class\|data class' src/
 Swift: grep -rn 'struct\|class\|enum' Sources/
 Dart: grep -rn 'class .* {' lib/
 ```
 
-记录每个实体的名称、关键字段、所在文件。
+### 现有配置检测
 
-#### 1.5 现有配置检测
+检查是否已有 CLAUDE.md / AGENTS.md / .github/workflows / .pre-commit-config.yaml / docs/，已有的不覆盖或问用户合并策略。
 
-检查项目是否已有：
-- CLAUDE.md / AGENTS.md（不覆盖，或问用户合并策略）
-- .github/workflows/（已有 CI 就不生成新的，或合并）
-- .pre-commit-config.yaml（同上）
-- docs/ 目录
+## A2：确认生成方案
 
-### Phase 2：确认生成方案
-
-把扫描结果汇总给用户确认：
+把扫描结果展示给用户：
 
 ```
-检测到的技术栈：TypeScript + Next.js
-包管理器：pnpm
-Linter：Biome
-Test runner：Vitest
-目录结构类型：功能模块（daemon / analyzer / generator / commands）
-检测到的实体：RawObservation, Observation, AnalysisResult, Config
+检测到：TypeScript + Next.js / pnpm / Biome / Vitest
+目录结构：功能模块（daemon / analyzer / generator / commands）
+实体：RawObservation, Observation, AnalysisResult, Config
 
-将生成：
-- CLAUDE.md — Claude 工作指令
-- AGENTS.md — Codex/Cursor 工作指令
-- docs/architecture.md — 基于实际目录结构
-- docs/golden-principles.md — 8 条黄金原则（使用 Biome 执行）
-- docs/domain-model.md — 基于扫描到的实体
-- docs/onboarding.md — 基于实际命令
-- scripts/layer-check.sh — 基于实际模块依赖
-- scripts/init.sh — 基于实际工具链
-- .github/workflows/ci.yml — 基于实际命令
-- .pre-commit-config.yaml — 基于实际工具
-- feature_list.json — 空模版
-- agent-progress.txt — 空日志
-
-确认？
+将生成 N 个文件，确认？
 ```
 
-用户确认后才生成。
+用户确认后进入 A3。
 
-### Phase 3：生成文件
+## A3：动态生成文件
 
-以下是每个文件的生成规则。所有内容都基于 Phase 1 的扫描结果，**不从 GitHub 拉预置模版**。
+所有文件基于扫描结果生成。
 
-#### 3.1 CLAUDE.md / AGENTS.md
+### CLAUDE.md / AGENTS.md
 
-从 GitHub 仓库拉取对应栈的模版作为**骨架**，然后用扫描结果替换所有动态内容：
-
-```
-拉取：https://raw.githubusercontent.com/ppop123/harness/main/stacks/$STACK/claude/CLAUDE.md
-拉取：https://raw.githubusercontent.com/ppop123/harness/main/stacks/$STACK/codex/AGENTS.md
-```
-
-必须替换的内容：
-- `[PROJECT_NAME]` → 项目名
-- `[ONE_LINE_DESCRIPTION]` → 描述
-- `[OWNER]` → 从 git config user.name / user.email 获取
-- `[DATE]` → 今天日期
-- 分层引用 → 替换为项目实际模块结构
-- 命令引用 → 替换为项目实际命令（如 `pnpm lint` 而不是 `npm run lint`）
-- `<!-- harness-init 适配 -->` 注释处 → 替换为真实内容
-
-#### 3.2 docs/architecture.md
-
-**完全根据扫描结果生成**，不用模版：
-
-```markdown
-# 架构文档 — [项目名]
-
-## 模块结构
-
-[从 1.3 的扫描结果生成目录树]
-
-## 模块职责
-
-| 模块 | 职责 | 依赖 |
-|------|------|------|
-[从代码的 import/require 关系推断每个模块的职责和依赖方向]
-
-## 依赖方向
-
-[画出实际的依赖方向，不要硬套 types → services → controllers]
-
-## 变更记录
-
-| 日期 | 变更 | 原因 |
-|------|------|------|
-| [TODAY] | 初始架构（由 harness-init 从代码扫描生成） | 项目装载 Harness |
-```
-
-#### 3.3 docs/golden-principles.md
-
-从 GitHub 拉取对应栈的黄金原则模版，但把**执行工具替换为项目实际使用的**：
+从 GitHub 拉取对应栈的模版骨架，替换所有动态内容：
+- `[PROJECT_NAME]` / `[OWNER]` / `[DATE]` → 真实值
+- 分层引用 → 项目实际模块结构
+- 命令引用 → 项目实际命令
+- `<!-- harness-init 适配 -->` 注释处 → 真实内容
 
 ```
-拉取：https://raw.githubusercontent.com/ppop123/harness/main/stacks/$STACK/docs/golden-principles.md
+https://raw.githubusercontent.com/ppop123/harness/main/stacks/$STACK/claude/CLAUDE.md
+https://raw.githubusercontent.com/ppop123/harness/main/stacks/$STACK/codex/AGENTS.md
 ```
 
-替换：
-- linter 名称（ESLint → Biome）
-- type checker（tsc → biome check）
-- 验证库（zod → 项目实际使用的）
-- 环境变量工具（@t3-oss/env-nextjs → 项目实际使用的）
+### docs/architecture.md
 
-#### 3.4 scripts/layer-check.sh
+**完全根据扫描结果生成**——用真实目录树、真实模块职责、真实依赖方向。不硬套 types→services→controllers。
 
-**完全根据扫描结果生成**：
+### docs/golden-principles.md
 
-- 如果项目是典型分层（types/services/controllers），生成标准分层检查
-- 如果项目是功能模块（daemon/analyzer/generator），生成**模块边界检查**——每个模块不应该直接 import 另一个模块的内部文件
-- 如果无法确定合理的依赖规则，生成一个带注释的骨架，标注 `# TODO: 根据项目实际情况补充依赖规则`
-- 不允许生成一个"什么都不检查"的空壳脚本——至少检查一些基本规则
+从 GitHub 拉取对应栈的黄金原则模版，把执行工具替换为项目实际使用的（ESLint→Biome 等）。
 
-#### 3.5 scripts/init.sh
+### scripts/layer-check.sh
 
-**完全根据扫描结果生成**，所有命令必须是项目里真实可运行的：
+**根据扫描到的目录结构生成**：
+- 典型分层 → 标准分层检查
+- 功能模块 → 模块边界检查
+- 无法确定 → 带 TODO 注释的骨架，但至少检查基本规则
 
-```bash
-#!/usr/bin/env bash
-# init.sh — 环境验证
+### scripts/init.sh
 
-set -euo pipefail
+**根据扫描到的工具链生成**，所有命令必须能在当前项目直接跑通。
 
-echo "🔧 验证环境..."
+### CI / pre-commit
 
-# 工具检查（从 1.2 检测到的工具）
-for cmd in [实际工具列表]; do
-  command -v "$cmd" &>/dev/null || { echo "✗ $cmd not found"; exit 1; }
-done
+同理，用实际命令。已有配置时问用户合并还是跳过。
 
-# 安装依赖（从 1.2 检测到的包管理器）
-[实际安装命令]
+### docs/domain-model.md
 
-# Lint（从 1.2 检测到的 linter）
-[实际 lint 命令]
+**基于扫描到的实体生成**，包含实体名、字段、所在文件、关联关系。推断不了的标注 `[待补充]`。
 
-# 测试（从 1.2 检测到的 test runner）
-[实际 test 命令]
+### docs/onboarding.md
 
-echo "✅ 环境验证通过"
-```
+基于实际命令生成，命令表必须能直接复制执行。
 
-#### 3.6 .github/workflows/ci.yml
-
-同理，所有步骤使用实际命令。如果项目已有 CI 配置，问用户是合并还是跳过。
-
-#### 3.7 .pre-commit-config.yaml
-
-同理。如果项目已有，问用户。
-
-#### 3.8 docs/domain-model.md
-
-基于 1.4 扫描到的实体生成：
-
-```markdown
-# 业务领域模型
-
-## 核心实体
-
-### [EntityName]
-描述: [从代码注释或命名推断，推断不了写 [待补充]]
-关键字段:
-  - [field1]: [type]
-  - [field2]: [type]
-所在文件: [file path]
-关联实体: [从 import 关系推断]
-```
-
-没扫描到的部分标注 `[待补充]`，不要编造。
-
-#### 3.9 docs/onboarding.md
-
-基于实际命令生成，常用命令表必须能直接复制执行。
-
-#### 3.10 其他文件
-
-以下文件从 GitHub 拉取即可，不需要动态生成：
+### 静态文件（从 GitHub 拉取）
 
 ```
 common/docs/tech-decisions/000-template.md → docs/tech-decisions/000-template.md
@@ -260,46 +158,148 @@ common/scripts/doc-gardening-prompt.md → scripts/doc-gardening-prompt.md
 common/scripts/new-feature-prompt.md → scripts/new-feature-prompt.md
 ```
 
-以下文件生成空模版：
+### 空模版
 
-```
-feature_list.json — 只保留结构，features 数组为空
-agent-progress.txt — 只保留头部说明
-.env.example — 从项目已有的 .env / .env.local / docker-compose.yml 推断需要的变量，没有就留空
-```
+- `feature_list.json` — features 数组为空
+- `agent-progress.txt` — 只有头部说明
+- `.env.example` — 从 .env/.env.local/docker-compose.yml 推断，没有就留空
 
-### Phase 4：验证
-
-生成完所有文件后，必须验证：
+## A4：验证
 
 ```bash
 bash scripts/init.sh         # 必须跑通
-bash scripts/layer-check.sh  # 必须检查真实目录，不能空跑通过
+bash scripts/layer-check.sh  # 必须检查真实目录，不能空跑
 ```
 
-如果失败，修正后重新验证，直到通过。
+失败就修，直到通过。
 
-### Phase 5：输出摘要
+## A5：输出摘要
+
+展示生成的文件列表、检测结果、下一步行动。
+
+---
+
+# 路径 B：全新项目
+
+适用于空目录。通过交互引导收集偏好，生成标准骨架 + Harness 结构。
+
+## B1：交互引导
+
+依次收集以下信息（能合并就合并问，尽量少打扰）：
+
+**必填**：
+1. **项目名称** — 自由输入
+2. **技术栈** — 从列表选择：
+   - TypeScript + Next.js (`ts-nextjs`)
+   - TypeScript + Node.js API (`ts-node`)
+   - Python + FastAPI (`python-fastapi`)
+   - Python + Django (`python-django`)
+   - Python AI / Data Science (`python-ai`)
+   - Java + Spring Boot (`java-spring`)
+   - C# + ASP.NET Core (`csharp-dotnet`)
+   - Go (`go`)
+   - Rust (`rust`)
+   - Swift + SwiftUI (`swift-ios`)
+   - Kotlin + Android (`kotlin-android`)
+   - Dart + Flutter (`dart-flutter`)
+   - React Native (`react-native`)
+3. **AI 工具** — Claude / Codex / 都要
+
+**可选**（有默认值）：
+4. **包管理器偏好** — 根据栈给默认值（如 TypeScript 默认 pnpm，Python 默认 uv）
+5. **Linter 偏好** — 根据栈给默认值（如 TypeScript 默认 Biome，Python 默认 Ruff）
+6. **一句话描述** — 项目做什么
+
+## B2：生成目录骨架
+
+根据选择的技术栈，生成该栈的标准项目目录结构。
+
+从 GitHub 拉取该栈的标准定义：
 
 ```
-✅ Harness 已装载
+https://raw.githubusercontent.com/ppop123/harness/main/stacks/$STACK/docs/architecture.md
+```
 
-生成了 N 个文件：
-- CLAUDE.md / AGENTS.md
-- docs/ (architecture, golden-principles, domain-model, onboarding)
-- scripts/ (init.sh, layer-check.sh, audit/doc-gardening/new-feature prompts)
-- CI + pre-commit
-- feature_list.json + agent-progress.txt
+读取其中的目录结构部分，在当前目录创建对应的空目录：
 
-检测结果：
-- 技术栈：[xxx]
-- 包管理器：[xxx]
-- Linter：[xxx]
-- 模块结构：[xxx]
-- 扫描到 N 个实体
+```bash
+# 示例：ts-nextjs
+mkdir -p src/types src/lib src/config src/repositories src/services src/app/api src/components
+mkdir -p docs docs/tech-decisions scripts .github/workflows
+```
+
+**每个目录下创建一个 .gitkeep 文件**，确保空目录能被 git 跟踪。
+
+## B3：生成 Harness 文件
+
+以下文件全部从 GitHub 拉取对应栈的模版，然后替换占位符：
+
+### 从 GitHub 拉取并替换占位符的文件
+
+```
+stacks/$STACK/claude/CLAUDE.md → CLAUDE.md
+stacks/$STACK/codex/AGENTS.md → AGENTS.md
+stacks/$STACK/docs/architecture.md → docs/architecture.md
+stacks/$STACK/docs/golden-principles.md → docs/golden-principles.md
+stacks/$STACK/docs/onboarding.md → docs/onboarding.md
+stacks/$STACK/scripts/layer-check.sh → scripts/layer-check.sh
+stacks/$STACK/scripts/init.sh → scripts/init.sh
+stacks/$STACK/ci/ci.yml → .github/workflows/ci.yml
+stacks/$STACK/config/pre-commit-config.yaml → .pre-commit-config.yaml
+stacks/$STACK/config/lint-config.txt → 放到对应位置（.eslintrc.json / pyproject.toml 等）
+common/docs/domain-model.md → docs/domain-model.md
+common/docs/tech-decisions/000-template.md → docs/tech-decisions/000-template.md
+common/scripts/audit-prompt.md → scripts/audit-prompt.md
+common/scripts/doc-gardening-prompt.md → scripts/doc-gardening-prompt.md
+common/scripts/new-feature-prompt.md → scripts/new-feature-prompt.md
+```
+
+占位符替换：
+- `[PROJECT_NAME]` → 项目名
+- `[ONE_LINE_DESCRIPTION]` → 描述
+- `[OWNER]` → 从 git config 获取
+- `[DATE]` → 今天日期
+
+### 根据用户偏好调整的文件
+
+如果用户选的包管理器或 linter 和模版默认不同，替换以下文件中的命令：
+- `scripts/init.sh` — 安装命令和 lint 命令
+- `.github/workflows/ci.yml` — 构建步骤
+- `.pre-commit-config.yaml` — hook 命令
+- `CLAUDE.md` / `AGENTS.md` — 完成标准中的命令
+- `docs/onboarding.md` — 常用命令表
+
+### 生成空模版
+
+- `feature_list.json` — features 数组为空
+- `agent-progress.txt` — 只有头部说明
+- `.env.example` — 根据栈生成典型变量名（如 DATABASE_URL、API_KEY），值留空
+
+## B4：输出摘要
+
+```
+✅ 项目骨架 + Harness 已生成
+
+项目：[name]
+技术栈：[stack]
+包管理器：[pm]
+Linter：[linter]
+
+生成了 N 个文件 + M 个目录
 
 下一步：
-1. 检查 docs/architecture.md 的模块描述是否准确
-2. 补充 docs/domain-model.md 中标记 [待补充] 的部分
+1. 安装依赖：[实际安装命令]
+2. 填写 docs/domain-model.md（定义你的业务实体）
 3. 开始开发时先读 CLAUDE.md
+4. 第一个功能完成后运行 bash scripts/layer-check.sh 验证分层
 ```
+
+---
+
+## 通用规则
+
+- 拉取文件失败时明确告诉用户并停止，不静默跳过
+- 目标文件已存在时先问用户覆盖策略
+- 不编造不存在的实体、命令或配置
+- 推断不了的内容标注 `[待补充]`
+- 生成的脚本必须有可执行权限（chmod +x）

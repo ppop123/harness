@@ -182,11 +182,12 @@ class GenerateRepoContractTests(unittest.TestCase):
                         msg=f"generated shell script should be parseable:\n{result.stderr}",
                     )
 
-    def test_harness_init_skill_source_is_scan_first(self) -> None:
+    def test_harness_init_skill_supports_both_paths(self) -> None:
         skill_md = (ROOT / "skills" / "harness-init" / "SKILL.md").read_text(encoding="utf-8")
-        self.assertIn("先扫描", skill_md)
-        self.assertIn("Phase 1", skill_md)
-        self.assertIn("Phase 4", skill_md)
+        self.assertIn("路径 A", skill_md)
+        self.assertIn("路径 B", skill_md)
+        self.assertIn("扫描", skill_md)
+        self.assertIn("引导", skill_md)
         self.assertNotIn("本 skill 自带", skill_md)
         self.assertNotIn("assets/", skill_md)
 
